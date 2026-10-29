@@ -1,0 +1,51 @@
+# Unity — gerados pelo editor, nunca versionar
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Bb]uild/
+[Bb]uilds/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Arquivos de IDE gerados pelo Unity
+.vs/
+.vscode/
+.idea/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Crash reports e builds
+sysinfo.txt
+crashlytics-buildid.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+*.exe
+
+# Burst / plugins
+/[Aa]ssets/[Ss]treamingAssets/aa*
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.slnx
