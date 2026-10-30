@@ -74,6 +74,11 @@ Assets/_Project/
 - Avisar a interface por **eventos C#** (`System.Action`), sem o script de jogo
   conhecer o HUD.
 - Todo movimento multiplicado por `Time.deltaTime`; pausa via `Time.timeScale = 0`.
+- **Materiais sempre do URP**, nunca os embutidos do pipeline antigo
+  (`Sprites-Default`, `Default-Line`): esses não respondem ao Bloom nem às luzes
+  2D. Ficam em Packages → Universal RP → Runtime → Materials.
+  `Sprite-Unlit-Default` para o que brilha sozinho (pontes, lasers, portais);
+  `Sprite-Lit-Default` para objetos sólidos (naves, nave-mãe, asteroides).
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -92,21 +97,34 @@ Assets/_Project/
 ## Mapa (cena Game)
 
 Ponte de luz principal (Fácil), objeto `LightBridge_A` com estes waypoints filhos,
-em ordem. Comprimento total: **59,5 unidades** (o requisito de 30 inimigos
+em ordem (o `LightBridge` usa a ordem da Hierarchy, não o nome). Comprimento total: **59,5 unidades** (o requisito de 30 inimigos
 enfileirados pede 18).
 
 | Waypoint | Posição (x, y) | Observação |
 | --- | --- | --- |
-| WP_00 | (-14, 4.5) | saída do portal |
-| WP_01 | (-9, 4.5) | |
-| WP_02 | (-9, -5) | |
-| WP_03 | (-3, -5) | |
-| WP_04 | (-3, 4.5) | |
-| WP_05 | (3, 4.5) | |
-| WP_06 | (3, -5) | |
-| WP_07 | (9, -5) | |
-| WP_08 | (9, 0) | |
-| WP_09 | (12, 0) | entrada da nave-mãe (x ≈ 13,5) |
+| wp_00 | (-14, 4.5) | saída do portal |
+| wp_01 | (-9, 4.5) | |
+| wp_02 | (-9, -5) | |
+| wp_03 | (-3, -5) | |
+| wp_04 | (-3, 4.5) | |
+| wp_05 | (3, 4.5) | |
+| wp_06 | (3, -5) | |
+| wp_07 | (9, -5) | |
+| wp_08 | (9, 0) | |
+| wp_09 | (12, 0) | entrada da nave-mãe (x ≈ 13,5) |
+
+Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
+
+| Objeto | Posição | Escala | Sorting Layer | Material | Observação |
+| --- | --- | --- | --- | --- | --- |
+| Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A` |
+| Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1 |
+| LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,15, 4 corner vertices |
+| Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
+| Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip` |
+
+Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
+Kenney.
 
 Os corredores entre as colunas da ponte (x ≈ -6, 0 e 6) são onde ficarão os
 pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenhada.
@@ -116,6 +134,8 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] `.gitignore` e `.gitattributes` de Unity na raiz
 - [x] `LightBridge.cs` — caminho por waypoints + LineRenderer
 - [x] Projeto Unity criado (6000.3.27f1, template 2D com URP) na raiz do repo
-- [ ] Primeiro commit do projeto no GitHub
-- [ ] Cena Game com câmera, fundo, portal, ponte de luz e nave-mãe
+- [x] Primeiro commit do projeto no GitHub (PR #1)
+- [x] Tags, layer `Enemy` e sorting layers configuradas
+- [x] Cena Game com câmera, portal, ponte de luz e nave-mãe (formas provisórias)
+- [ ] Fundo com estrelas (parallax)
 - [ ] Pontos de ancoragem

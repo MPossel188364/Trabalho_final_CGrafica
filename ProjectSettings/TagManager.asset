@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Enemy
+  - MotherShip
   layers:
   - Default
   - TransparentFX
@@ -11,7 +13,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Enemy
   - 
   - 
   - 
@@ -38,6 +40,24 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 1824514519
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Bridges
+    uniqueID: 2416731001
+    locked: 0
+  - name: Ships
+    uniqueID: 3105529731
+    locked: 0
+  - name: Enemies
+    uniqueID: 3864911283
+    locked: 0
+  - name: Projectiles
+    uniqueID: 1295018907
+    locked: 0
+  - name: Effects
+    uniqueID: 2774602163
     locked: 0
