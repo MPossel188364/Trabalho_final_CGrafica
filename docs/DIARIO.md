@@ -78,3 +78,45 @@ junto com a `Assets/_Project` que já existia.
 **Problema encontrado:** o Hub mostrava "project not found". O editor estava
 parado esperando o aceite dos termos de uso, numa janela que tinha ficado
 escondida. Registrado no `CLAUDE.md`.
+
+---
+
+## 2026-10-29 — Mapa, parte 2: cena Game com câmera, ponte, portal e nave-mãe
+
+**Feito (arquivos de configuração):**
+- `SampleScene` renomeada e movida para `Assets/_Project/Scenes/Game.unity`,
+  junto com o `.meta` (mantém o mesmo ID e continua na lista de cenas do build,
+  em `ProjectSettings/EditorBuildSettings.asset`).
+- `ProjectSettings/TagManager.asset`: tags `Enemy` e `MotherShip`; layer 6 =
+  `Enemy`; sorting layers `Background`, `Default`, `Bridges`, `Ships`,
+  `Enemies`, `Projectiles`, `Effects` (de trás para frente).
+
+**Feito (no editor, pelo João):** câmera, `LightBridge_A` com 10 waypoints,
+`Portal_A` e `Mothership`. Valores na tabela "Mapa" do `CLAUDE.md`.
+
+**Por quê:**
+- **Tag × layer.** A tag é um rótulo que o código confere depois de uma colisão
+  (o inimigo vai perguntar "encostei na `MotherShip`?"). A layer é um filtro da
+  física: a torre vai buscar alvos com `OverlapCircle` só na layer `Enemy`, sem
+  testar asteroides e projéteis.
+- **Sorting layers.** Em 2D tudo está em z = 0; quem decide o que fica na frente
+  é a ordem das sorting layers. `Default` fica logo após o fundo para que um
+  sprite esquecido sem layer não suma atrás das estrelas.
+- **Câmera ortográfica size 9.** O size é metade da altura visível: 18 unidades
+  de altura, 32 de largura em 16:9. É o tamanho de mapa do plano.
+- **Materiais do URP.** A linha usa `Sprite-Unlit-Default` (brilha sozinha, não
+  depende de luz); portal e nave-mãe usam `Sprite-Lit-Default` (reagem à Global
+  Light 2D e a luzes futuras). Os materiais embutidos antigos funcionam hoje,
+  mas não respondem ao Bloom da etapa de efeitos.
+- **Formas provisórias** (círculo e quadrado do Unity) no lugar dos sprites:
+  permitem testar posições e escala agora; a arte entra depois sem mudar a lógica.
+
+**Problemas encontrados:**
+- Ao arrastar um material para o campo do Sprite Renderer, às vezes o Unity
+  ignora a soltura sem avisar. Conferir o campo depois de soltar.
+- No seletor de materiais, os assets de pacotes não aparecem por padrão. Mais
+  fácil: abrir a pasta em Packages na janela Project e arrastar de lá.
+
+**Como verificar:** abrir a cena Game; o Inspector de `LightBridge_A` deve
+mostrar `Total Length` = 59,5. Arrastar um waypoint (tecla W, setas na Scene
+view) e a linha acompanha.
