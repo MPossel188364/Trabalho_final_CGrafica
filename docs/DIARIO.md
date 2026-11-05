@@ -120,3 +120,67 @@ escondida. Registrado no `CLAUDE.md`.
 **Como verificar:** abrir a cena Game; o Inspector de `LightBridge_A` deve
 mostrar `Total Length` = 59,5. Arrastar um waypoint (tecla W, setas na Scene
 view) e a linha acompanha.
+
+---
+
+## 2026-11-04 — Inimigo e nave-mãe, parte 1: andar pela ponte e chegar na base
+
+**Feito:** `Scripts/Data/EnemyData.cs`, `Scripts/Enemies/Enemy.cs` e
+`Scripts/Core/MotherShip.cs`.
+
+**O que faz:**
+- `EnemyData`: um asset com vida, velocidade, dano à base, créditos e pontos de
+  um tipo de inimigo. Os valores padrão são os do Drone.
+- `Enemy`: `Initialize(ponte, multiplicadores)` coloca o inimigo no `wp_00`. A cada
+  frame ele anda até o próximo waypoint com `Vector2.MoveTowards`, gira o sprite
+  para a direção do movimento e soma a distância percorrida. Tem `TakeDamage` e os
+  eventos `Died` e `ReachedBase`.
+- `MotherShip`: guarda a vida. Quando um inimigo toca o trigger dela
+  (`OnTriggerEnter2D`), lê o dano do inimigo, manda o inimigo sumir e desconta a
+  vida. Avisa por `HealthChanged` (para o HUD) e `Destroyed` (para o GameManager).
+
+**Por quê assim:**
+- **Números em ScriptableObject.** Drone, Caça e Couraçado usam o mesmo script
+  `Enemy` com três assets diferentes. Os multiplicadores do Difícil entram como
+  parâmetros do `Initialize`, então não precisa duplicar os assets.
+- **O inimigo não sabe de créditos, pontos nem HUD.** Ele só avisa por evento
+  (`Died`, `ReachedBase`); quem escuta (WaveSpawner, GameSession) decide o que
+  fazer. Assim cada classe tem uma responsabilidade só.
+- **O caminho vem da `LightBridge`.** O inimigo pede `GetWaypoint(i)`, então anda
+  exatamente pela linha que está desenhada.
+- **`MoveTowards` + `Time.deltaTime`.** A velocidade é em unidades por segundo,
+  igual em qualquer FPS, e o `MoveTowards` nunca passa do alvo, então o inimigo
+  não "ultrapassa" um waypoint. Na curva a sobra do passo é descartada, o que dá
+  menos de 0,05 unidade por frame.
+- **`DistanceTravelled`.** As torres vão usar para saber quem é o "primeiro da fila".
+- **`Rigidbody2D` Kinematic no inimigo.** O `OnTriggerEnter2D` só dispara se pelo
+  menos um dos dois objetos tem `Rigidbody2D`. Como o inimigo anda por código, ele
+  é Kinematic: a física não o empurra, mas o trigger funciona. A nave-mãe não
+  precisa de `Rigidbody2D`.
+- **A `MotherShip` reconhece o inimigo pelo componente** (`TryGetComponent<Enemy>`),
+  não pela tag: errar o nome de uma tag não dá erro nenhum.
+- **`IsAlive`** impede o inimigo de causar dano duas vezes se dois triggers
+  acontecerem no mesmo frame.
+- **Provisório:** a vida da nave-mãe (20) está no Inspector até existir o
+  `DifficultyData`, e o campo `Test Bridge` do `Enemy` existe só para testar sem
+  `WaveSpawner`. Os dois saem quando o `WaveSpawner` for feito.
+
+**Como testar (a cena Game, com `LightBridge_A` e `Mothership`, vem do PR da cena):**
+1. Em `Assets/_Project/Data/`, botão direito → Create → NebulaGuard → Enemy Data,
+   com o nome `Drone`. Os valores padrão já são os do Drone.
+2. Crie o prefab do Drone: um sprite de tamanho cerca de 0,6, com os componentes
+   `Enemy` (o `Rigidbody2D` entra como Kinematic sozinho) e `CircleCollider2D` com
+   Is Trigger ligado. Arraste o asset `Drone` para o campo Data, use o Sorting Layer
+   `Enemies` e salve em `Assets/_Project/Prefabs/`.
+3. No objeto `Mothership` da cena, adicione o script `MotherShip` (o `BoxCollider2D`
+   entra junto) e ligue **Is Trigger**. Atenção: essa nave-mãe (centro x = 13,8,
+   escala 2,5 × 4) ainda não tinha collider, e um collider do tamanho do sprite
+   começaria em x = 12,55, depois do `wp_09` (x = 12): o drone pararia antes de
+   tocar e o Console avisaria. Ponha **Offset X = -0,5** no collider: ele anda 1,25
+   unidade para a esquerda e a borda esquerda vai a x = 11,3, antes do `wp_09`.
+4. Arraste o prefab para a cena e, no campo `Test Bridge` dessa instância, arraste
+   o `LightBridge_A`. Dê Play.
+5. O drone deve aparecer no `wp_00`, andar o zigue-zague inteiro (59,5 ÷ 2,5 ≈ 24 s)
+   e sumir ao encostar na nave-mãe, cuja `Current Health` cai de 20 para 19. Se ele
+   parar no fim da ponte, o Console avisa que o trigger não o pegou.
+6. O `TakeDamage` do inimigo será testado quando os projéteis existirem.

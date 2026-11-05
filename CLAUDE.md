@@ -82,6 +82,11 @@ Assets/_Project/
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
+- Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
+  (`Died`, `ReachedBase`); quem reage (créditos, pontos, HUD) assina o evento.
+- Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
+  não pela tag. Quem se move por código usa `Rigidbody2D` **Kinematic**: sem
+  `Rigidbody2D` em pelo menos um dos lados, o `OnTriggerEnter2D` não dispara.
 
 ## Padrões de cena
 
@@ -137,5 +142,11 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Primeiro commit do projeto no GitHub (PR #1)
 - [x] Tags, layer `Enemy` e sorting layers configuradas
 - [x] Cena Game com câmera, portal, ponte de luz e nave-mãe (formas provisórias)
+- [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs` (scripts escritos, ainda sem teste na cena)
+- [ ] Ligar na cena e testar: asset e prefab do Drone, componente `MotherShip` no objeto
+  `Mothership` (ainda sem collider: precisa de `BoxCollider2D` trigger com a borda
+  esquerda em x ≤ 11,5 para alcançar o `wp_09`) e o drone chegando na base
+  (passo a passo na entrada de 04/11 do `docs/DIARIO.md`)
 - [ ] Fundo com estrelas (parallax)
 - [ ] Pontos de ancoragem
+- [ ] `WaveSpawner` (substitui o campo provisório `Test Bridge` do `Enemy`)
