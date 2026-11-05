@@ -77,11 +77,6 @@ Assets/_Project/
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
-- Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
-  (`Died`, `ReachedBase`); quem reage (créditos, pontos, HUD) assina o evento.
-- Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
-  não pela tag. Quem se move por código usa `Rigidbody2D` **Kinematic**: sem
-  `Rigidbody2D` em pelo menos um dos lados, o `OnTriggerEnter2D` não dispara.
 
 ## Padrões de cena
 
@@ -121,8 +116,6 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] `.gitignore` e `.gitattributes` de Unity na raiz
 - [x] `LightBridge.cs` — caminho por waypoints + LineRenderer
 - [x] Projeto Unity criado (6000.3.27f1, template 2D com URP) na raiz do repo
-- [x] Primeiro commit do projeto no GitHub (PR #1)
-- [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs` (scripts escritos, ainda sem teste na cena)
+- [ ] Primeiro commit do projeto no GitHub
 - [ ] Cena Game com câmera, fundo, portal, ponte de luz e nave-mãe
-- [ ] Asset e prefab do Drone, `MotherShip` na cena e teste do drone chegando na base
 - [ ] Pontos de ancoragem
