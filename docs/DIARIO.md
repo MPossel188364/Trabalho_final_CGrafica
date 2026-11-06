@@ -139,3 +139,54 @@ escondida. Registrado no `CLAUDE.md`.
    e sumir ao encostar na nave-mãe, cuja `Current Health` cai de 20 para 19. Se ele
    parar no fim da ponte, o Console avisa que o trigger não o pegou.
 6. O `TakeDamage` do inimigo será testado quando os projéteis existirem.
+
+---
+
+## 2026-11-06 — Cena Game, parte 1: montagem automática (`GameSceneBuilder.cs`)
+
+**Feito:** `Assets/_Project/Scripts/Editor/GameSceneBuilder.cs`, uma ferramenta do
+editor. Em **NebulaGuard → Montar cena Game** ela cria, de uma vez:
+- as Sorting Layers (`Background`, `Bridges`, `Ships`, `Enemies`, `Projectiles`,
+  `Effects`), as tags `Enemy` e `MotherShip` e a layer `Enemy`;
+- sprites provisórios gerados por código (círculo, anel, triângulo e estrelas) em
+  `Assets/_Project/Art/` e o material da ponte;
+- a cena `Scenes/Game.unity`, copiada da cena de exemplo (que já tem câmera e luz 2D),
+  com a câmera ortográfica size 9, o fundo, o portal, a `LightBridge_A` com os 10
+  waypoints da tabela do `CLAUDE.md` e a nave-mãe;
+- o asset `Data/Drone.asset`, o prefab `Prefabs/Drone.prefab` e um `Drone_Teste` na
+  cena, já apontando para a ponte pelo campo `Test Bridge`.
+
+**Por quê assim:**
+- **Script em vez de cliques manuais.** Montar tudo à mão no Inspector são dezenas de
+  passos fáceis de errar (um waypoint fora do lugar, um collider pequeno). O script
+  repete sempre o mesmo resultado, e os outros dois do trio podem recriar a cena se
+  um conflito de merge a estragar.
+- **A cena nasce da `SampleScene`** em vez de uma cena vazia: já vem com a câmera e a
+  `Global Light 2D` do URP, que seriam trabalhosas de criar por código.
+- **Pasta `Editor`.** O Unity só compila esse código no editor; ele usa a API do
+  editor (`AssetDatabase`, `SerializedObject`) e quebraria o build do `.exe`.
+- **`SerializedObject` para preencher campos privados** (`data`, `testBridge`): faz o
+  mesmo que arrastar no Inspector, sem tornar os campos `public`.
+- **Nave-mãe:** sprite de 1 unidade com escala 4 e collider trigger de raio 0,5 (2
+  unidades no mundo). Centro em x = 13,5, então a borda esquerda fica em x = 11,5,
+  antes do último waypoint (x = 12), como pede o passo 3 da entrada de 2026-11-04.
+- **Triângulo apontando para cima** no Drone, para casar com `spriteAngleOffset = -90`
+  do `Enemy`.
+- **IDs das Sorting Layers vindos do hash do nome** (`Animator.StringToHash`): o Unity
+  copia o ID da camada anterior ao inserir, o que duplicaria IDs. Com o hash, o ID é
+  único e igual em qualquer PC.
+- Rodar de novo recria a cena (pede confirmação) mas mantém o `Drone.asset`, para não
+  perder balanceamento editado.
+
+**Como testar:**
+1. Abra o projeto no Unity 6000.3.27f1 e aguarde compilar (sem erros no Console).
+2. Menu **NebulaGuard → Montar cena Game**. O Console mostra "Cena Game montada" e o
+   comprimento da ponte, que deve ser **59,5**.
+3. Dê **Play**. O `Drone_Teste` sai do portal (roxo, à esquerda), anda o zigue-zague
+   pela linha ciano e some ao tocar a nave-mãe (azul, à direita), em cerca de 24 s.
+4. Selecione `MotherShip` na Hierarchy: `Current Health` deve cair de 20 para 19.
+5. Se o drone parar antes da base, o Console avisa que o trigger não o pegou.
+6. Commite `Game.unity`, `Art/`, `Data/`, `Prefabs/`, `Materials/` e os `.meta`.
+
+**Ainda não testado:** escrito sem acesso ao Unity. Se aparecer erro de compilação ou
+o teste falhar, o ponto de partida é o Console.

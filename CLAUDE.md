@@ -50,6 +50,7 @@ Assets/_Project/
     Player/    Astronaut
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
+    Editor/    GameSceneBuilder (só existe no editor, não entra no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
   Prefabs/     naves, inimigos, projéteis, efeitos
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
@@ -82,6 +83,12 @@ Assets/_Project/
 - Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
   não pela tag. Quem se move por código usa `Rigidbody2D` **Kinematic**: sem
   `Rigidbody2D` em pelo menos um dos lados, o `OnTriggerEnter2D` não dispara.
+
+- Scripts de ferramenta do editor ficam em `Scripts/Editor/`, no namespace
+  `NebulaGuard.EditorTools`. Pasta com esse nome só compila no editor.
+- Sprites provisórios (círculo, anel, triângulo, estrelas) são gerados por código em
+  `Assets/_Project/Art/` pelo `GameSceneBuilder`. Para trocar pela arte final, substitua
+  o PNG mantendo o nome, ou arraste outro sprite no `SpriteRenderer`.
 
 ## Padrões de cena
 
@@ -123,6 +130,10 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Projeto Unity criado (6000.3.27f1, template 2D com URP) na raiz do repo
 - [x] Primeiro commit do projeto no GitHub (PR #1)
 - [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs` (scripts escritos, ainda sem teste na cena)
-- [ ] Cena Game com câmera, fundo, portal, ponte de luz e nave-mãe
-- [ ] Asset e prefab do Drone, `MotherShip` na cena e teste do drone chegando na base
-- [ ] Pontos de ancoragem
+- [x] `Scripts/Editor/GameSceneBuilder.cs` — menu **NebulaGuard → Montar cena Game** cria
+  a cena Game (câmera, fundo, portal, ponte de luz, nave-mãe), as Sorting Layers, a tag
+  `MotherShip`/`Enemy`, a layer `Enemy`, o asset `Drone`, o prefab do Drone e um
+  `Drone_Teste` na cena (script escrito, **ainda não rodado no Unity**)
+- [ ] Rodar o menu no Unity, dar Play e conferir: o drone anda os 59,5 de ponte (~24 s) e a
+  vida da nave-mãe cai de 20 para 19. Depois, commitar a cena, os assets e os `.meta`
+- [ ] Pontos de ancoragem (próximo passo)
