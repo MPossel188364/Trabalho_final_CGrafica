@@ -229,3 +229,65 @@ estava pendente desde a entrada de 04/11.
 **Como testar:** abrir a cena Game, dar Play e seguir o passo 5 da entrada de
 04/11. Para ver a `Current Health` durante o jogo, pôr o Inspector em modo Debug
 (menu ⋮ no canto do Inspector).
+
+---
+
+## 2026-11-08 — Naves-torre, parte 1: o Caça atirando no Drone
+
+**Feito (código):** `Scripts/Data/TowerData.cs`, `Scripts/Towers/TowerShip.cs` e
+`Scripts/Towers/Projectile.cs`.
+
+**Feito (no editor, pelo João):**
+- `Data/Caca.asset` (TowerData com os valores do Caça) e `Prefabs/Laser_Caca.prefab`
+  (Capsule verde 0,12 × 0,4, `Sprite-Unlit-Default`, Sorting Layer `Projectiles`,
+  `Projectile` + `Rigidbody2D` Kinematic + `CircleCollider2D` trigger).
+- `Prefabs/Caca.prefab`: Triangle verde, escala 0,8, Sorting Layer `Ships`,
+  `TowerShip` com o asset `Caca` e um filho `Muzzle` em (0, 0,5), a ponta da nave.
+- Uma instância do Caça na cena em (-6, 0), o corredor entre as colunas x = -9 e -3.
+- `Prefabs/Drone.prefab` passou para a layer `Enemy` e a tag `Enemy`.
+
+**O que faz:**
+- `TowerData`: custo, alcance, disparos por segundo, dano, velocidade do projétil,
+  velocidade de giro, modo de mirar e o prefab do projétil. Padrões = Caça (50, 3,5,
+  3/s, 5).
+- `TowerShip`, a cada frame: busca inimigos com `Physics2D.OverlapCircle` filtrando a
+  layer `Enemy`; escolhe o alvo (Caça: maior `DistanceTravelled`, o primeiro da fila);
+  gira com `Quaternion.RotateTowards`; atira quando a recarga (`1 / fireRate`) acabou
+  e a mira está a menos de 10° do alvo. Desenha o alcance como gizmo com a nave
+  selecionada.
+- `Projectile`: persegue o alvo enquanto ele vive (se morrer, segue reto e some em
+  2 s); ao tocar um inimigo (`OnTriggerEnter2D`) chama `TakeDamage` e some.
+
+**Resultado:** o drone (15 de vida) leva 3 tiros de 5 e é destruído antes de chegar
+à base. Primeiro teste do `Enemy.TakeDamage`.
+
+**Por quê assim:**
+- **Modo de mirar como `enum` + `switch`,** e não a interface `ITargetStrategy` do doc
+  de design: com poucos critérios fixos, cabe num campo do asset e é mais simples de
+  explicar. O critério do Bombardeiro ("mais inimigos juntos") entra quando ele for feito.
+- **Filtro por layer no `OverlapCircle`:** a física só devolve colliders da layer
+  `Enemy`, sem testar projéteis nem a nave-mãe. `useTriggers = true` porque os
+  inimigos usam collider trigger.
+- **Lista reaproveitada** (`List<Collider2D>` criada uma vez) para não alocar memória a
+  cada frame em cada nave.
+- **Só atira mirando:** com giro limitado em graus por segundo, a nave vira aos poucos;
+  atirar antes de mirar mandaria o laser para o lado errado.
+- **Campo `Projectile Prefab` tipado como `Projectile`** (e não `GameObject`): o Unity
+  só aceita ali um prefab que tenha o componente, então não dá para ligar um objeto
+  que não sabe voar nem causar dano.
+- **Projétil persegue o alvo:** o drone faz curvas de 90°; um tiro reto mirado na
+  posição atual erraria nas curvas. Acerta qualquer inimigo que tocar no caminho.
+
+**Problemas encontrados:**
+- **Drone na layer Default:** a torre não o enxergava. Prefab passou para a layer `Enemy`.
+- **Prefab salvo sem o componente:** o `Laser_Caca` virou prefab antes de receber o
+  `Projectile`, e o campo do TowerData o recusava (o tipo não batia).
+- **Dois arquivos chamados `Caca` na pasta `Data`:** o asset (TowerData) e um prefab da
+  nave criado ali sem querer. O campo Data do `TowerShip` ficou vazio e a nave não
+  fazia nada (`data == null` → `return`). O prefab foi movido para `Prefabs/`.
+- **Muzzle só na cena:** o filho foi criado depois do prefab, então era um *override*
+  da instância. **Overrides → Apply All** copiou para o prefab.
+
+**Como testar:** abrir a cena Game e dar Play. O Caça gira para o drone quando ele
+passa pelas colunas x = -9 e -3, dispara lasers verdes e o drone some após 3
+acertos; a `Current Health` da nave-mãe continua em 20 (ver em modo Debug).
