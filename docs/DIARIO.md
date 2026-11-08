@@ -81,6 +81,48 @@ escondida. Registrado no `CLAUDE.md`.
 
 ---
 
+## 2026-10-29 — Mapa, parte 2: cena Game com câmera, ponte, portal e nave-mãe
+
+**Feito (arquivos de configuração):**
+- `SampleScene` renomeada e movida para `Assets/_Project/Scenes/Game.unity`,
+  junto com o `.meta` (mantém o mesmo ID e continua na lista de cenas do build,
+  em `ProjectSettings/EditorBuildSettings.asset`).
+- `ProjectSettings/TagManager.asset`: tags `Enemy` e `MotherShip`; layer 6 =
+  `Enemy`; sorting layers `Background`, `Default`, `Bridges`, `Ships`,
+  `Enemies`, `Projectiles`, `Effects` (de trás para frente).
+
+**Feito (no editor, pelo João):** câmera, `LightBridge_A` com 10 waypoints,
+`Portal_A` e `Mothership`. Valores na tabela "Mapa" do `CLAUDE.md`.
+
+**Por quê:**
+- **Tag × layer.** A tag é um rótulo que o código confere depois de uma colisão
+  (o inimigo vai perguntar "encostei na `MotherShip`?"). A layer é um filtro da
+  física: a torre vai buscar alvos com `OverlapCircle` só na layer `Enemy`, sem
+  testar asteroides e projéteis.
+- **Sorting layers.** Em 2D tudo está em z = 0; quem decide o que fica na frente
+  é a ordem das sorting layers. `Default` fica logo após o fundo para que um
+  sprite esquecido sem layer não suma atrás das estrelas.
+- **Câmera ortográfica size 9.** O size é metade da altura visível: 18 unidades
+  de altura, 32 de largura em 16:9. É o tamanho de mapa do plano.
+- **Materiais do URP.** A linha usa `Sprite-Unlit-Default` (brilha sozinha, não
+  depende de luz); portal e nave-mãe usam `Sprite-Lit-Default` (reagem à Global
+  Light 2D e a luzes futuras). Os materiais embutidos antigos funcionam hoje,
+  mas não respondem ao Bloom da etapa de efeitos.
+- **Formas provisórias** (círculo e quadrado do Unity) no lugar dos sprites:
+  permitem testar posições e escala agora; a arte entra depois sem mudar a lógica.
+
+**Problemas encontrados:**
+- Ao arrastar um material para o campo do Sprite Renderer, às vezes o Unity
+  ignora a soltura sem avisar. Conferir o campo depois de soltar.
+- No seletor de materiais, os assets de pacotes não aparecem por padrão. Mais
+  fácil: abrir a pasta em Packages na janela Project e arrastar de lá.
+
+**Como verificar:** abrir a cena Game; o Inspector de `LightBridge_A` deve
+mostrar `Total Length` = 59,5. Arrastar um waypoint (tecla W, setas na Scene
+view) e a linha acompanha.
+
+---
+
 ## 2026-11-04 — Inimigo e nave-mãe, parte 1: andar pela ponte e chegar na base
 
 **Feito:** `Scripts/Data/EnemyData.cs`, `Scripts/Enemies/Enemy.cs` e
@@ -89,7 +131,7 @@ escondida. Registrado no `CLAUDE.md`.
 **O que faz:**
 - `EnemyData`: um asset com vida, velocidade, dano à base, créditos e pontos de
   um tipo de inimigo. Os valores padrão são os do Drone.
-- `Enemy`: `Initialize(ponte, multiplicadores)` coloca o inimigo no `WP_00`. A cada
+- `Enemy`: `Initialize(ponte, multiplicadores)` coloca o inimigo no `wp_00`. A cada
   frame ele anda até o próximo waypoint com `Vector2.MoveTowards`, gira o sprite
   para a direção do movimento e soma a distância percorrida. Tem `TakeDamage` e os
   eventos `Died` e `ReachedBase`.
@@ -123,19 +165,22 @@ escondida. Registrado no `CLAUDE.md`.
   `DifficultyData`, e o campo `Test Bridge` do `Enemy` existe só para testar sem
   `WaveSpawner`. Os dois saem quando o `WaveSpawner` for feito.
 
-**Como testar (precisa da cena Game, com `LightBridge_A` e a nave-mãe):**
+**Como testar (a cena Game, com `LightBridge_A` e `Mothership`, vem do PR da cena):**
 1. Em `Assets/_Project/Data/`, botão direito → Create → NebulaGuard → Enemy Data,
    com o nome `Drone`. Os valores padrão já são os do Drone.
 2. Crie o prefab do Drone: um sprite de tamanho cerca de 0,6, com os componentes
    `Enemy` (o `Rigidbody2D` entra como Kinematic sozinho) e `CircleCollider2D` com
    Is Trigger ligado. Arraste o asset `Drone` para o campo Data, use o Sorting Layer
    `Enemies` e salve em `Assets/_Project/Prefabs/`.
-3. Na nave-mãe, adicione o script `MotherShip`. O collider (Is Trigger) precisa
-   cobrir o último waypoint: com o `WP_09` em x = 12, a borda esquerda do collider
-   deve ficar em x = 11,5 ou menos.
+3. No objeto `Mothership` da cena, adicione o script `MotherShip` (o `BoxCollider2D`
+   entra junto) e ligue **Is Trigger**. Atenção: essa nave-mãe (centro x = 13,8,
+   escala 2,5 × 4) ainda não tinha collider, e um collider do tamanho do sprite
+   começaria em x = 12,55, depois do `wp_09` (x = 12): o drone pararia antes de
+   tocar e o Console avisaria. Ponha **Offset X = -0,5** no collider: ele anda 1,25
+   unidade para a esquerda e a borda esquerda vai a x = 11,3, antes do `wp_09`.
 4. Arraste o prefab para a cena e, no campo `Test Bridge` dessa instância, arraste
    o `LightBridge_A`. Dê Play.
-5. O drone deve aparecer no `WP_00`, andar o zigue-zague inteiro (59,5 ÷ 2,5 ≈ 24 s)
+5. O drone deve aparecer no `wp_00`, andar o zigue-zague inteiro (59,5 ÷ 2,5 ≈ 24 s)
    e sumir ao encostar na nave-mãe, cuja `Current Health` cai de 20 para 19. Se ele
    parar no fim da ponte, o Console avisa que o trigger não o pegou.
 6. O `TakeDamage` do inimigo será testado quando os projéteis existirem.
