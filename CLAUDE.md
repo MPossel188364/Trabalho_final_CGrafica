@@ -126,7 +126,8 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1 |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,15, 4 corner vertices |
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
-| Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip` |
+| Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
+| Drone (1) | solto na cena | 0.6 | Enemies | Sprite-Lit-Default | instância do `Prefabs/Drone` com `Test Bridge` = `LightBridge_A` (provisória, sai com o `WaveSpawner`) |
 
 Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
 Kenney.
@@ -142,11 +143,9 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Primeiro commit do projeto no GitHub (PR #1)
 - [x] Tags, layer `Enemy` e sorting layers configuradas
 - [x] Cena Game com câmera, portal, ponte de luz e nave-mãe (formas provisórias)
-- [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs` (scripts escritos, ainda sem teste na cena)
-- [ ] Ligar na cena e testar: asset e prefab do Drone, componente `MotherShip` no objeto
-  `Mothership` (ainda sem collider: precisa de `BoxCollider2D` trigger com a borda
-  esquerda em x ≤ 11,5 para alcançar o `wp_09`) e o drone chegando na base
-  (passo a passo na entrada de 04/11 do `docs/DIARIO.md`)
+- [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs`
+- [x] Drone na cena: `Data/Drone.asset`, `Prefabs/Drone.prefab`, `MotherShip` no
+  `Mothership` (collider trigger com Offset X = -0,5) e teste do drone chegando na base
+- [ ] Ponto de ancoragem + Caça atirando no Drone (fecha a "base jogável" do plano)
 - [ ] Fundo com estrelas (parallax)
-- [ ] Pontos de ancoragem
 - [ ] `WaveSpawner` (substitui o campo provisório `Test Bridge` do `Enemy`)
