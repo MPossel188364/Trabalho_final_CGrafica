@@ -79,6 +79,11 @@ Assets/_Project/
   2D. Ficam em Packages → Universal RP → Runtime → Materials.
   `Sprite-Unlit-Default` para o que brilha sozinho (pontes, lasers, portais);
   `Sprite-Lit-Default` para objetos sólidos (naves, nave-mãe, asteroides).
+- Campo que guarda um prefab é tipado pelo componente que ele precisa ter
+  (`Projectile projectilePrefab`, não `GameObject`): o Inspector recusa prefab errado.
+- `Data/` só tem assets de dados (`.asset`); objetos vão em `Prefabs/`. Mudança feita
+  numa instância de prefab na cena (ex.: filho novo) só vai para o prefab com
+  **Overrides → Apply**.
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -127,7 +132,8 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,15, 4 corner vertices |
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
 | Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
-| Drone (1) | solto na cena | 0.6 | Enemies | Sprite-Lit-Default | instância do `Prefabs/Drone` com `Test Bridge` = `LightBridge_A` (provisória, sai com o `WaveSpawner`) |
+| Drone | solto na cena | 0.6 | Enemies | Sprite-Lit-Default | instância do `Prefabs/Drone` com `Test Bridge` = `LightBridge_A` (provisória, sai com o `WaveSpawner`) |
+| Caca | (-6, 0) | 0.8 | Ships | Sprite-Lit-Default | instância do `Prefabs/Caca` (TowerShip + filho `Muzzle`); provisória até o `BuildSlot` |
 
 Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
 Kenney.
@@ -146,6 +152,7 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] `EnemyData.cs`, `Enemy.cs` e `MotherShip.cs`
 - [x] Drone na cena: `Data/Drone.asset`, `Prefabs/Drone.prefab`, `MotherShip` no
   `Mothership` (collider trigger com Offset X = -0,5) e teste do drone chegando na base
-- [ ] Ponto de ancoragem + Caça atirando no Drone (fecha a "base jogável" do plano)
+- [x] `TowerData.cs`, `TowerShip.cs`, `Projectile.cs`; Caça em (-6, 0) atirando no Drone
+- [ ] `BuildSlot`: pontos de ancoragem e posicionar a nave com um clique
 - [ ] Fundo com estrelas (parallax)
 - [ ] `WaveSpawner` (substitui o campo provisório `Test Bridge` do `Enemy`)

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6472d2c3b28ce4abf8dfca96b01cd21f, type: 3}
+  m_Name: Caca
+  m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.TowerData
+  displayName: "Ca\xE7a"
+  cost: 50
+  range: 3.5
+  fireRate: 3
+  damage: 5
+  projectileSpeed: 14
+  turnSpeed: 540
+  targeting: 0
+  projectilePrefab: {fileID: 5751343955770343520, guid: 337b441c589b8460f9230050d34cda86, type: 3}
