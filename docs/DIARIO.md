@@ -184,3 +184,48 @@ view) e a linha acompanha.
    e sumir ao encostar na nave-mãe, cuja `Current Health` cai de 20 para 19. Se ele
    parar no fim da ponte, o Console avisa que o trigger não o pegou.
 6. O `TakeDamage` do inimigo será testado quando os projéteis existirem.
+
+---
+
+## 2026-11-08 — Inimigo e nave-mãe, parte 2: o Drone na cena e o teste até a base
+
+**Feito (no editor, pelo João):**
+- `Data/Drone.asset`: o `EnemyData` do Drone, com os valores padrão (vida 15,
+  velocidade 2,5, dano 1, 5 créditos, 10 pontos).
+- `Prefabs/Drone.prefab`: sprite Triangle do Unity, escala 0,6, Sorting Layer
+  `Enemies`, `Sprite-Lit-Default`; componentes `Enemy` (com o asset no campo Data),
+  `Rigidbody2D` Kinematic e `CircleCollider2D` trigger.
+- Cena Game: componente `MotherShip` no `Mothership`, com `BoxCollider2D` trigger e
+  **Offset X = -0,5**; uma instância do Drone com `Test Bridge` = `LightBridge_A`.
+
+**Resultado:** no Play o drone sai do portal, percorre o zigue-zague (~24 s), some
+ao tocar a nave-mãe e a `Current Health` cai de 20 para 19. Fecha o teste que
+estava pendente desde a entrada de 04/11.
+
+**Por quê assim:**
+- **Offset X = -0,5 no collider da nave-mãe.** A nave-mãe está em x = 13,8 com
+  largura 2,5: um collider do tamanho do sprite começaria em x = 12,55, e a ponte
+  termina em x = 12 (a borda do drone chega a 12,3). O offset é em unidades locais,
+  antes da escala: -0,5 × 2,5 = -1,25 no mundo, e a borda vai a x = 11,3.
+- **Triângulo:** aponta para cima, o que casa com o `spriteAngleOffset = -90` do
+  `Enemy` (a ponta segue a direção do movimento).
+- **`Test Bridge` só na instância da cena,** não no prefab: um prefab é um asset do
+  projeto e não pode referenciar objeto de uma cena (o Unity mostra "Type mismatch").
+  Quem vai ligar inimigo e ponte por código é o `WaveSpawner`.
+- **Fora do Play o drone fica onde foi solto** na cena: quem o leva ao `wp_00` é o
+  `Initialize`, chamado no `Start()`, que só roda no Play.
+
+**Problemas encontrados:**
+- **O arquivo `.cs` precisa ter o mesmo nome da classe.** O script `EnemyData.cs`
+  foi renomeado por engano para `Drone.cs` (em vez do asset). O Unity deixou de
+  reconhecer o asset como `EnemyData` e o campo Data do `Enemy` recusava o arquivo.
+  Voltar o nome resolveu; o `.meta` (com o GUID) foi junto, então nada se perdeu.
+- **"Type mismatch" no `Test Bridge`:** era o prefab (ou o Prefab Mode) sendo
+  editado, e não a instância da cena. Ver acima.
+- **Um drone parado no meio da tela durante o Play:** sobrou na cena o objeto
+  original usado para criar o prefab, sem `Test Bridge`. Sem `Initialize`, o
+  `IsAlive` fica falso e o `Update` não faz nada. Foi apagado.
+
+**Como testar:** abrir a cena Game, dar Play e seguir o passo 5 da entrada de
+04/11. Para ver a `Current Health` durante o jogo, pôr o Inspector em modo Debug
+(menu ⋮ no canto do Inspector).
