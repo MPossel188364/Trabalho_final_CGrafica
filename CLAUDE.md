@@ -50,6 +50,7 @@ Assets/_Project/
     Player/    Astronaut
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
+    Editor/    BuildSlotSetup (só existe no editor, não entra no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
   Prefabs/     naves, inimigos, projéteis, efeitos
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
@@ -84,6 +85,20 @@ Assets/_Project/
 - `Data/` só tem assets de dados (`.asset`); objetos vão em `Prefabs/`. Mudança feita
   numa instância de prefab na cena (ex.: filho novo) só vai para o prefab com
   **Overrides → Apply**.
+- **Créditos e pontos só mudam pelo `GameSession`** (`TrySpend`, `AddCredits`,
+  `AddScore`); a interface escuta `CreditsChanged` e `ScoreChanged`. Todo inimigo gerado
+  precisa de `session.Register(enemy)` (o `WaveSpawner` deve chamar), senão não dá
+  créditos ao morrer.
+- **Construir** = `BuildController` (clique) → `BuildMenuUI` (escolha) → `GameSession`
+  (cobra) → `BuildSlot` (instancia). O custo vem do `TowerData` da nave. Nave nova no
+  jogo = acrescentar o prefab em `Tower Prefabs` do `BuildController`.
+- **`BuildMenuUI` monta o próprio Canvas e botões por código** (uGUI + `Text` legado,
+  fonte `LegacyRuntime.ttf`) e cria um `EventSystem` se a cena não tiver nenhum. O
+  projeto usa só o **novo Input System**: ler mouse/teclado com `Mouse.current` e
+  `Keyboard.current`, nunca `Input.GetKey`/`Input.mousePosition`.
+- Scripts de ferramenta do editor ficam em `Scripts/Editor/`, no namespace
+  `NebulaGuard.EditorTools`, e **só acrescentam** à cena (nunca recriam `Game.unity`):
+  o grupo edita a cena à mão e uma ferramenta que a recria apagaria o trabalho dos outros.
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -133,7 +148,17 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
 | Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
 | Drone | solto na cena | 0.6 | Enemies | Sprite-Lit-Default | instância do `Prefabs/Drone` com `Test Bridge` = `LightBridge_A` (provisória, sai com o `WaveSpawner`) |
-| Caca | (-6, 0) | 0.8 | Ships | Sprite-Lit-Default | instância do `Prefabs/Caca` (TowerShip + filho `Muzzle`); provisória até o `BuildSlot` |
+| BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
+| GameSession | (0, 0) | — | — | — | créditos iniciais 100 (provisório, até o `DifficultyData`) |
+| BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça |
+
+O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots. O `Drone` de teste
+continua solto (sai com o `WaveSpawner`).
+
+Posições dos slots (dois por corredor, y = ±2): (-6, ±2), (0, ±2) e (6, ±2).
+**Atenção:** `BuildSlots`, `GameSession` e `BuildController` só passam a existir em
+`Game.unity` depois que alguém roda **NebulaGuard → Adicionar slots de construção** e
+commita a cena (ver o item pendente em Estado atual).
 
 Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
 Kenney.
@@ -153,6 +178,12 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Drone na cena: `Data/Drone.asset`, `Prefabs/Drone.prefab`, `MotherShip` no
   `Mothership` (collider trigger com Offset X = -0,5) e teste do drone chegando na base
 - [x] `TowerData.cs`, `TowerShip.cs`, `Projectile.cs`; Caça em (-6, 0) atirando no Drone
-- [ ] `BuildSlot`: pontos de ancoragem e posicionar a nave com um clique
+- [x] **Construção de naves (item A) — código pronto:** `GameSession.cs` (créditos e
+  pontos), `BuildSlot.cs` (ponto de ancoragem), `BuildController.cs` (clique),
+  `BuildMenuUI.cs` (menu de escolha com nome, custo e saldo) e a ferramenta
+  `Editor/BuildSlotSetup.cs` (menu **NebulaGuard → Adicionar slots de construção**)
+- [ ] **Falta o primeiro teste no Unity do item A:** rodar o menu acima, dar Play, clicar
+  num slot, construir o Caça (créditos 100 → 50) e ver o drone morrer (+5 créditos).
+  Depois, commitar `Game.unity`, `Prefabs/BuildSlot.prefab` e os `.meta`
 - [ ] Fundo com estrelas (parallax)
 - [ ] `WaveSpawner` (substitui o campo provisório `Test Bridge` do `Enemy`)

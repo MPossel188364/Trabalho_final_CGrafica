@@ -291,3 +291,67 @@ estava pendente desde a entrada de 04/11.
 **Como testar:** abrir a cena Game e dar Play. O Caça gira para o drone quando ele
 passa pelas colunas x = -9 e -3, dispara lasers verdes e o drone some após 3
 acertos; a `Current Health` da nave-mãe continua em 20 (ver em modo Debug).
+
+---
+
+## 2026-11-10 — Construção, parte 1: créditos, slots e menu de escolha
+
+**Feito:** `Scripts/Core/GameSession.cs`, `Scripts/Towers/BuildSlot.cs`,
+`Scripts/Towers/BuildController.cs`, `Scripts/UI/BuildMenuUI.cs` e a ferramenta
+`Scripts/Editor/BuildSlotSetup.cs`.
+
+**O que faz:**
+- `GameSession`: guarda créditos (100 no início, provisório) e pontos. `Register(enemy)`
+  escuta `Died` (soma `CreditsReward` e `ScoreReward` do `EnemyData`) e `ReachedBase`
+  (não dá nada). `TrySpend` só gasta se houver saldo. Avisa por `CreditsChanged` e
+  `ScoreChanged`.
+- `BuildSlot`: um ponto de ancoragem. Sabe se está livre (`IsFree`) e instancia a nave no
+  centro dele (`TryPlace`). O círculo ciano some quando a nave ocupa o slot.
+- `BuildController`: a cada clique, converte o mouse para o mundo e testa com
+  `Physics2D.OverlapPoint` se há um `BuildSlot` livre ali. Se há, abre o menu; senão,
+  fecha. Ao escolher uma nave: `TrySpend(custo)` e depois `TryPlace`. Esc também fecha.
+- `BuildMenuUI`: painel junto ao slot com um botão por nave ("Caça — 50") e o saldo.
+  Botão fica desligado quando o saldo não cobre o custo e se atualiza ao vivo.
+- `BuildSlotSetup` (menu **NebulaGuard → Adicionar slots de construção**): cria o prefab
+  `BuildSlot`, 6 slots nos corredores (x = -6, 0 e 6; y = ±2), o `GameSession` e o
+  `BuildController` na cena Game, e remove o Caça solto.
+
+**Por quê assim:**
+- **Uma peça por responsabilidade.** O slot não cobra, o `GameSession` não conhece
+  slot nem menu, o menu não sabe construir. Só o `BuildController` conversa com os
+  três; trocar o menu por outro não mexe nas regras.
+- **O custo vem do `TowerData`** (`prefab.Data.Cost`): o número continua em ScriptableObject
+  e o menu lê da própria nave. Naves novas entram só acrescentando o prefab na lista
+  `Tower Prefabs`, com o tipo `TowerShip` (o Inspector recusa prefab errado).
+- **Gastar antes de posicionar, devolver se falhar:** evita construir sem pagar. O
+  `TryPlace` só falha se o slot foi ocupado no meio tempo, caso em que o dinheiro volta.
+- **Clique em UI é ignorado pelo controlador** (`IsPointerOverGameObject`): senão apertar
+  um botão do menu contaria também como clique no mundo e fecharia o menu.
+- **Novo Input System:** o projeto está com `activeInputHandler: 1` (só o novo), então
+  `Input.mousePosition` daria erro. Usa `Mouse.current` e `Keyboard.current`.
+- **Menu montado por código:** Canvas, painel e botões nascem no `Awake`, e um
+  `EventSystem` é criado se não houver (botões não funcionam sem ele). Evita um prefab
+  de UI para montar à mão; a contrapartida é que mudar o visual exige mexer no código.
+  O HUD (item D) pode usar o mesmo `EventSystem`.
+- **Slots nos corredores, a 2 unidades do centro:** ficam longe dos trechos horizontais
+  da ponte e a 3 das colunas vizinhas, dentro do alcance de 3,5 do Caça.
+- **Ferramenta só acrescenta.** O Game.unity agora é editado à mão por mais de uma
+  pessoa; uma ferramenta que o recriasse apagaria o trabalho dos outros. Rodar de novo
+  não duplica nada (se `BuildSlots`, `GameSession` e `BuildController` já existem, mantém).
+- **Provisório:** `GameSession.Start` registra os inimigos que já estão na cena (o Drone
+  de teste) para ele dar créditos ao morrer. Sai quando o `WaveSpawner` chamar `Register`.
+
+**Como testar (no Unity 6000.3.27f1):**
+1. Abra o projeto e espere compilar sem erros no Console.
+2. Menu **NebulaGuard → Adicionar slots de construção** e confirme. A cena Game ganha os 6
+   círculos ciano, o `GameSession` e o `BuildController`; o Caça solto some.
+3. Dê **Play** e, antes de o drone chegar (cerca de 24 s), clique num círculo: o menu
+   mostra "Créditos: 100" e o botão "Caça — 50".
+4. Clique no botão: o Caça aparece no slot e o círculo some. Reabra o menu em outro slot: o
+   saldo é 50.
+5. O Caça atira no drone; ao morrer o saldo sobe 5 (de 50 para 55).
+6. Com saldo menor que 50 o botão fica cinza. Esc ou clique fora fecha o menu.
+7. Commite `Game.unity`, `Prefabs/BuildSlot.prefab` e os `.meta`.
+
+**Ainda não testado:** escrito sem acesso ao Unity. Se der erro de compilação ou o menu
+não aparecer, o ponto de partida é o Console.
