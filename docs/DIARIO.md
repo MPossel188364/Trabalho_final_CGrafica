@@ -355,3 +355,24 @@ acertos; a `Current Health` da nave-mãe continua em 20 (ver em modo Debug).
 
 **Ainda não testado:** escrito sem acesso ao Unity. Se der erro de compilação ou o menu
 não aparecer, o ponto de partida é o Console.
+
+---
+
+## 2026-11-13 — Construção, parte 2: slots na cena e primeiro teste no Unity
+
+**Feito (no editor, pelo João):** rodado o menu **NebulaGuard → Adicionar slots de
+construção** na cena Game. A cena ganhou `BuildSlots` (6 slots, instâncias do novo
+`Prefabs/BuildSlot.prefab`), `GameSession` (100 créditos) e `BuildController`
+(`Tower Prefabs` = Caça); o Caça solto em (-6, 0) saiu.
+
+**Resultado do teste (passos da entrada de 10/11):**
+- Clicar num slot abre o menu com o saldo e "Caça — 50"; escolher posiciona o Caça
+  no slot e desconta 50.
+- Com o saldo abaixo de 50 o botão fica desligado e não dá para comprar.
+- O drone destruído pelo Caça dá +5 créditos (`GameSession.Register` → `Died`).
+
+Fecha o item que estava pendente: o código do PR #7 agora está testado e a cena com
+os slots está no repositório.
+
+**Como testar:** abrir a cena Game, dar Play, clicar num círculo ciano e comprar o
+Caça; ver o saldo cair de 100 para 50 e subir 5 quando o drone morre.
