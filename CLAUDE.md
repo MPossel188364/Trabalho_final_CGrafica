@@ -99,6 +99,9 @@ Assets/_Project/
 - Scripts de ferramenta do editor ficam em `Scripts/Editor/`, no namespace
   `NebulaGuard.EditorTools`, e **só acrescentam** à cena (nunca recriam `Game.unity`):
   o grupo edita a cena à mão e uma ferramenta que a recria apagaria o trabalho dos outros.
+- Ao duplicar um prefab de inimigo ou nave (`Cmd + D`), **trocar o campo Data**: a cópia
+  continua apontando para o asset do original. Mudanças em ScriptableObject só vão para o
+  disco com **File → Save Project** (o `Cmd + S` salva a cena).
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -182,8 +185,8 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Ondas: `DifficultyData.cs`, `WaveSpawner.cs`, `Data/Facil.asset` (3 ondas só de
   drones) e `WaveSpawner` na cena; provisórios `Test Bridge` e registro no
   `GameSession.Start` removidos
-- [ ] Balanceamento: Drone com 25 de vida em teste (era 15); confirmar e atualizar o plano
-- [ ] Caça alienígena e Couraçado alienígena (`EnemyData` + prefab) e trocar nas ondas 2 e 3
+- [x] Caça alienígena e Couraçado alienígena (`EnemyData` + prefab) nas ondas 2 e 3 do Fácil
+- [x] Balanceamento do Fácil testado (Caça com 3 de dano; valores no plano e no diário de 13/11)
 - [ ] HUD: contagem regressiva antes de cada onda (`WaveCountdownStarted`), onda atual,
   créditos, pontos e vida da nave-mãe
 - [ ] Fundo com estrelas (parallax)

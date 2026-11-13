@@ -16,7 +16,7 @@ MonoBehaviour:
   cost: 50
   range: 3.5
   fireRate: 3
-  damage: 5
+  damage: 3
   projectileSpeed: 14
   turnSpeed: 540
   targeting: 0
