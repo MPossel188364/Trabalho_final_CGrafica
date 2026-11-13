@@ -23,7 +23,13 @@ MonoBehaviour:
       count: 6
   - groups:
     - enemyPrefab: {fileID: 8142490711994510087, guid: 588e1e6f5f6954f8bb462aad647bdabb, type: 3}
-      count: 7
+      count: 4
+    - enemyPrefab: {fileID: 8142490711994510087, guid: d55f02ba92e02452fa90bf7cbfd6aa7a, type: 3}
+      count: 3
   - groups:
     - enemyPrefab: {fileID: 8142490711994510087, guid: 588e1e6f5f6954f8bb462aad647bdabb, type: 3}
-      count: 5
+      count: 3
+    - enemyPrefab: {fileID: 8142490711994510087, guid: d55f02ba92e02452fa90bf7cbfd6aa7a, type: 3}
+      count: 2
+    - enemyPrefab: {fileID: 8142490711994510087, guid: 801cca09b52d347649dc7064b8448d5b, type: 3}
+      count: 1

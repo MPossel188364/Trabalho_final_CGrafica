@@ -427,3 +427,52 @@ Valor final a confirmar no Play; depois, atualizar a tabela de inimigos do plano
 **Como testar:** dar Play na cena Game. 10 s sem nada (comprar as naves), depois 6
 drones em fila; com a onda eliminada, mais 10 s e a onda 2, depois a 3. No Inspector do
 `WaveSpawner` em modo Debug dá para ver `Current Wave` e `aliveInWave`.
+
+---
+
+## 2026-11-13 — Ondas, parte 2: Caça alienígena, Couraçado e balanceamento
+
+**Feito (no editor, pelo João), sem código novo:**
+- `Data/CacaAlienigena.asset` e `Data/Couracado.asset` (EnemyData), duplicados do Drone.
+- `Prefabs/CacaAlienigena.prefab` (Triangle vermelho, escala 0,8) e
+  `Prefabs/Couracado.prefab` (Capsule roxa, escala 0,9 × 1,4), duplicados do Drone:
+  herdam a layer e a tag `Enemy`, o `Rigidbody2D` Kinematic e o collider trigger.
+- `Data/Facil.asset`: onda 1 = 6 drones; onda 2 = 4 drones + 3 caças alienígenas;
+  onda 3 = 3 drones + 2 caças alienígenas + 1 couraçado.
+- Balanceamento (valores finais, testados nas três ondas):
+
+| | Vida | Velocidade | Dano à base | Créditos | Pontos |
+| --- | --- | --- | --- | --- | --- |
+| Drone | 25 (era 15) | 2,5 | 1 | 5 | 10 |
+| Caça alienígena | 40 | 2 (era 1,6) | 5 (era 2) | 10 | 25 |
+| Couraçado alienígena | 150 | 1,5 (era 0,8) | 5 | 30 | 80 |
+
+  e o **Caça (nave)** passou de 5 para **3 de dano** (3 tiros/s → 9 de dano por segundo).
+  O plano foi atualizado com esses números.
+
+**Por quê assim:**
+- **Nenhum script novo:** o `Enemy` é genérico; o que diferencia um tipo do outro são os
+  números (`EnemyData`) e a aparência (prefab). É o motivo de usar ScriptableObjects.
+- **Duplicar o prefab do Drone** em vez de montar do zero: a cópia já vem com os
+  detalhes que deram trabalho (layer, tag, Kinematic, trigger).
+- **Formas diferentes de longe:** tamanho e cor distinguem os inimigos; o Couraçado é
+  comprido na vertical porque o `Enemy` trata "para cima" como a frente do sprite.
+- **Caça de 5 para 3 de dano:** comparando com as outras naves do plano, o Caça rendia
+  15 de dano por segundo por 50 créditos (3,0 a cada 10 créditos), quase o dobro do
+  Bombardeiro (1,5) e do Cruzador (1,7). Com 3 de dano fica em 1,8: todas as naves
+  passam a valer a compra, e o Caça continua sendo a de tiro rápido.
+- **Inimigos mais rápidos:** com a torre mais fraca, a velocidade maior do caça
+  alienígena e do couraçado faz eles passarem menos tempo no alcance das naves.
+
+**Problemas encontrados:**
+- **Prefab duplicado continua apontando para os dados do original:** os dois prefabs
+  novos ficaram com `Data = Drone`, então o primeiro teste tinha três "drones" de cores
+  diferentes. Ao duplicar um prefab, trocar o campo Data é obrigatório.
+- **Valores trocados entre dois assets** (dano, créditos e pontos do caça alienígena e do
+  couraçado invertidos): conferidos e corrigidos antes do commit.
+- **Asset alterado não ia para o disco:** `Cmd + S` salva a cena; para gravar mudanças em
+  ScriptableObjects, **File → Save Project**.
+
+**Como testar:** Play na cena Game e jogar as três ondas comprando Caças com os créditos
+ganhos. Na onda 2 os caças alienígenas passam da primeira linha; na onda 3 o couraçado
+exige várias naves cobrindo o caminho.
