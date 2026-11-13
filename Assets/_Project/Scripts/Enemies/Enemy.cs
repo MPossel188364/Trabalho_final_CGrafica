@@ -14,9 +14,6 @@ namespace NebulaGuard
     {
         [SerializeField] private EnemyData data;
 
-        [Tooltip("Só para testar sem o WaveSpawner: se preenchido, o inimigo se inicializa sozinho no Start. Remover quando o WaveSpawner existir.")]
-        [SerializeField] private LightBridge testBridge;
-
         [Tooltip("Ângulo somado à rotação para o sprite apontar para onde anda. Os sprites do Kenney apontam para cima, por isso -90.")]
         [SerializeField] private float spriteAngleOffset = -90f;
 
@@ -73,12 +70,6 @@ namespace NebulaGuard
             transform.position = bridge.GetWaypoint(0);
             nextWaypoint = 1;
             initialized = true;
-        }
-
-        private void Start()
-        {
-            if (!initialized && testBridge != null)
-                Initialize(testBridge);
         }
 
         private void Update()

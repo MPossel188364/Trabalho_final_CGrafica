@@ -355,3 +355,75 @@ acertos; a `Current Health` da nave-mãe continua em 20 (ver em modo Debug).
 
 **Ainda não testado:** escrito sem acesso ao Unity. Se der erro de compilação ou o menu
 não aparecer, o ponto de partida é o Console.
+
+---
+
+## 2026-11-13 — Construção, parte 2: slots na cena e primeiro teste no Unity
+
+**Feito (no editor, pelo João):** rodado o menu **NebulaGuard → Adicionar slots de
+construção** na cena Game. A cena ganhou `BuildSlots` (6 slots, instâncias do novo
+`Prefabs/BuildSlot.prefab`), `GameSession` (100 créditos) e `BuildController`
+(`Tower Prefabs` = Caça); o Caça solto em (-6, 0) saiu.
+
+**Resultado do teste (passos da entrada de 10/11):**
+- Clicar num slot abre o menu com o saldo e "Caça — 50"; escolher posiciona o Caça
+  no slot e desconta 50.
+- Com o saldo abaixo de 50 o botão fica desligado e não dá para comprar.
+- O drone destruído pelo Caça dá +5 créditos (`GameSession.Register` → `Died`).
+
+Fecha o item que estava pendente: o código do PR #7 agora está testado e a cena com
+os slots está no repositório.
+
+**Como testar:** abrir a cena Game, dar Play, clicar num círculo ciano e comprar o
+Caça; ver o saldo cair de 100 para 50 e subir 5 quando o drone morre.
+
+---
+
+## 2026-11-13 — Ondas, parte 1: `DifficultyData` e `WaveSpawner`
+
+**Feito (código):** `Scripts/Data/DifficultyData.cs` e `Scripts/Enemies/WaveSpawner.cs`.
+Removidos os dois provisórios que o spawner substitui: o campo `Test Bridge` (e o
+`Start`) do `Enemy` e o registro automático de inimigos no `GameSession.Start`.
+
+**Feito (no editor, pelo João):**
+- `Data/Facil.asset` (DifficultyData): intervalo 1,2 s, preparação 10 s,
+  multiplicadores 1,0; ondas de 6, 7 e 5 drones (o plano pede caças e couraçado
+  alienígenas nas ondas 2 e 3, que ainda não existem).
+- Cena Game: objeto `WaveSpawner` (Difficulty = `Facil`, Bridges = `LightBridge_A`,
+  Session = `GameSession`). O `Drone` de teste saiu da cena.
+- `Data/Drone.asset`: vida 15 → **25** (balanceamento em teste, ver abaixo).
+
+**O que faz:**
+- `DifficultyData`: um asset por dificuldade, com as ondas (lista de grupos
+  "prefab + quantidade"), o intervalo entre inimigos, a preparação antes de cada onda
+  e os multiplicadores de vida e velocidade. Os outros números do plano (créditos
+  iniciais, vida da nave-mãe, tempo máximo, multiplicador de pontos) entram quando quem
+  os usa existir.
+- `WaveSpawner`: uma corrotina percorre as ondas. Para cada uma: espera a preparação,
+  solta os inimigos um a um e espera até todos terem morrido ou chegado à base. Em cada
+  inimigo chama `Initialize` (ponte + multiplicadores) e `session.Register`. Avisa por
+  `WaveCountdownStarted`, `WaveStarted`, `WaveCleared` e `AllWavesCleared`, para o HUD e o
+  `GameManager` futuros.
+
+**Por quê assim:**
+- **Corrotina:** a sequência "espera, solta, espera acabar" fica escrita em ordem, como
+  uma receita, em vez de espalhada em contadores no `Update`. `WaitForSeconds` respeita o
+  `Time.timeScale`, então a pausa do jogo também pausa as ondas.
+- **Contagem dos vivos pelos eventos** `Died` e `ReachedBase`: o spawner não precisa
+  procurar inimigos na cena; os dois casos contam como "saiu de cena".
+- **Ondas no asset da dificuldade,** não no spawner: o mesmo `WaveSpawner` roda o Fácil e
+  o Difícil trocando só o asset. Com duas pontes (Difícil), os inimigos se alternam.
+- **Preparação também antes da primeira onda:** é o tempo de posicionar as naves. O
+  plano ganhou uma contagem regressiva no topo da tela para isso (HUD, futuro), ligada
+  ao `WaveCountdownStarted`.
+
+**Balanceamento (em teste):** com o Drone de 15 de vida, um Caça (3 tiros × 5 = 15 de
+dano por segundo) matava cada drone em ~1 s, antes de o próximo chegar (1,2 s): nenhum
+passava da primeira torre, e com 100 créditos já dá para comprar duas. Com 25 de vida
+são ~1,7 s por drone, mais que o intervalo, então a fila se acumula. Dano e custo do Caça
+ficaram iguais (valem para o jogo todo, e o Caça ainda vai enfrentar inimigos de 40 e 150).
+Valor final a confirmar no Play; depois, atualizar a tabela de inimigos do plano.
+
+**Como testar:** dar Play na cena Game. 10 s sem nada (comprar as naves), depois 6
+drones em fila; com a onda eliminada, mais 10 s e a onda 2, depois a 3. No Inspector do
+`WaveSpawner` em modo Debug dá para ver `Current Wave` e `aliveInWave`.

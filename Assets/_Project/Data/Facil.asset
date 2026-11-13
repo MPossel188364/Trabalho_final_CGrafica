@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c81c5b71afb594e72b322a1811d2216e, type: 3}
+  m_Name: Facil
+  m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.DifficultyData
+  displayName: "F\xE1cil"
+  spawnInterval: 1.2
+  timeBetweenWaves: 10
+  healthMultiplier: 1
+  speedMultiplier: 1
+  waves:
+  - groups:
+    - enemyPrefab: {fileID: 8142490711994510087, guid: 588e1e6f5f6954f8bb462aad647bdabb, type: 3}
+      count: 6
+  - groups:
+    - enemyPrefab: {fileID: 8142490711994510087, guid: 588e1e6f5f6954f8bb462aad647bdabb, type: 3}
+      count: 7
+  - groups:
+    - enemyPrefab: {fileID: 8142490711994510087, guid: 588e1e6f5f6954f8bb462aad647bdabb, type: 3}
+      count: 5

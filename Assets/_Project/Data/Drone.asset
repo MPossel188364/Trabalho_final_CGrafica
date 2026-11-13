@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drone
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.EnemyData
   displayName: Drone
-  maxHealth: 15
+  maxHealth: 25
   speed: 2.5
   baseDamage: 1
   creditsReward: 5

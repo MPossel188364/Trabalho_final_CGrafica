@@ -147,19 +147,14 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,15, 4 corner vertices |
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
 | Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
-| Drone | solto na cena | 0.6 | Enemies | Sprite-Lit-Default | instância do `Prefabs/Drone` com `Test Bridge` = `LightBridge_A` (provisória, sai com o `WaveSpawner`) |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
 | GameSession | (0, 0) | — | — | — | créditos iniciais 100 (provisório, até o `DifficultyData`) |
+| WaveSpawner | (0, 0) | — | — | — | Difficulty = `Data/Facil`, Bridges = `LightBridge_A`, Session = `GameSession`; gera os inimigos (nenhum inimigo fica na cena antes do Play) |
 | BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça |
 
-O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots. O `Drone` de teste
-continua solto (sai com o `WaveSpawner`).
+O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
 
 Posições dos slots (dois por corredor, y = ±2): (-6, ±2), (0, ±2) e (6, ±2).
-**Atenção:** `BuildSlots`, `GameSession` e `BuildController` só passam a existir em
-`Game.unity` depois que alguém roda **NebulaGuard → Adicionar slots de construção** e
-commita a cena (ver o item pendente em Estado atual).
-
 Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
 Kenney.
 
@@ -182,8 +177,13 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
   pontos), `BuildSlot.cs` (ponto de ancoragem), `BuildController.cs` (clique),
   `BuildMenuUI.cs` (menu de escolha com nome, custo e saldo) e a ferramenta
   `Editor/BuildSlotSetup.cs` (menu **NebulaGuard → Adicionar slots de construção**)
-- [ ] **Falta o primeiro teste no Unity do item A:** rodar o menu acima, dar Play, clicar
-  num slot, construir o Caça (créditos 100 → 50) e ver o drone morrer (+5 créditos).
-  Depois, commitar `Game.unity`, `Prefabs/BuildSlot.prefab` e os `.meta`
+- [x] Construção testada no Unity: slots na cena, compra do Caça (100 → 50), botão
+  desligado sem saldo e +5 créditos ao destruir o drone
+- [x] Ondas: `DifficultyData.cs`, `WaveSpawner.cs`, `Data/Facil.asset` (3 ondas só de
+  drones) e `WaveSpawner` na cena; provisórios `Test Bridge` e registro no
+  `GameSession.Start` removidos
+- [ ] Balanceamento: Drone com 25 de vida em teste (era 15); confirmar e atualizar o plano
+- [ ] Caça alienígena e Couraçado alienígena (`EnemyData` + prefab) e trocar nas ondas 2 e 3
+- [ ] HUD: contagem regressiva antes de cada onda (`WaveCountdownStarted`), onda atual,
+  créditos, pontos e vida da nave-mãe
 - [ ] Fundo com estrelas (parallax)
-- [ ] `WaveSpawner` (substitui o campo provisório `Test Bridge` do `Enemy`)

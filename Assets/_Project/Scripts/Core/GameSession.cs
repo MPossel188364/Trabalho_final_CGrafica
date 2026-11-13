@@ -31,14 +31,6 @@ namespace NebulaGuard
             score = 0;
         }
 
-        private void Start()
-        {
-            // Provisório: registra os inimigos que já estão na cena (o Drone de teste).
-            // Sai quando o WaveSpawner existir: ele chama Register em cada inimigo que gerar.
-            foreach (Enemy enemy in FindObjectsByType<Enemy>(FindObjectsSortMode.None))
-                Register(enemy);
-        }
-
         /// <summary>
         /// Passa a escutar um inimigo: se ele for destruído, o jogador ganha créditos e
         /// pontos; se chegar à nave-mãe, não ganha nada. O WaveSpawner chama ao gerar cada um.
