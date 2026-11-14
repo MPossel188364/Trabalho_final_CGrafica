@@ -476,3 +476,61 @@ drones em fila; com a onda eliminada, mais 10 s e a onda 2, depois a 3. No Inspe
 **Como testar:** Play na cena Game e jogar as três ondas comprando Caças com os créditos
 ganhos. Na onda 2 os caças alienígenas passam da primeira linha; na onda 3 o couraçado
 exige várias naves cobrindo o caminho.
+
+---
+
+## 2026-11-14 — Partida: `GameManager` (estados, cronômetro, pausa, vitória e derrota)
+
+**Feito (código):** `Scripts/Core/GameManager.cs`, e ajustes em `DifficultyData`,
+`WaveSpawner`, `GameSession`, `MotherShip` e `BuildController`.
+
+**Feito (no editor, pelo João):** objeto `GameManager` na cena Game (Difficulty =
+`Data/Facil`, e as referências a `WaveSpawner`, `Mothership`, `GameSession` e
+`BuildController`). O `Data/Facil` ganhou créditos iniciais 100, vida da nave-mãe 20 e
+tempo máximo 240 s.
+
+**O que faz:**
+- Estados `Preparing` (contagem antes da primeira onda) → `Playing` ⇄ `Paused` →
+  `Victory` ou `Defeat`, avisados pelo evento `StateChanged`.
+- No `Start`, aplica a dificuldade (`session.Begin(créditos)`, `motherShip.Begin(vida)`)
+  e só então chama `waveSpawner.Begin(dificuldade)`.
+- Cronômetro: começa na primeira onda (`WaveStarted`); zerou = derrota.
+- Vitória: `AllWavesCleared` do `WaveSpawner`. Derrota: `Destroyed` da `MotherShip` ou
+  o tempo. No fim: para as ondas, bloqueia a construção, `Time.timeScale = 0` e escreve o
+  resultado no Console (as telas de fim são do HUD).
+- Esc: com o menu de construção aberto, fecha o menu; senão pausa/retoma. Na pausa não
+  dá para construir.
+
+**Por quê assim:**
+- **O `GameManager` só escuta e decide.** Quem sabe a vida é a `MotherShip`, quem sabe
+  as ondas é o `WaveSpawner`; ele assina os eventos deles. Nenhum dos dois conhece o
+  `GameManager`.
+- **A dificuldade mora em um lugar só.** Antes o `WaveSpawner` tinha o campo; agora o
+  `GameManager` recebe o `DifficultyData` e repassa (`Begin`). Quando o menu principal
+  existir, a escolha do jogador vai para um lugar só.
+- **Números da partida no `DifficultyData`** (créditos, vida, tempo), como pede o padrão
+  de balanceamento em ScriptableObject. Os campos antigos no Inspector do `GameSession` e
+  da `MotherShip` ficaram só como reserva para cenas sem `GameManager`. Os créditos
+  continuam 100 (o plano dizia 150), porque o balanceamento de 13/11 foi testado com 100.
+- **Aplicar no `Start`, não no `Awake`:** o `Start` roda depois do `Awake` de todos os
+  objetos da cena, então `GameSession` e `MotherShip` já se inicializaram e o `GameManager`
+  sobrescreve com os valores da dificuldade.
+- **Pausa com `Time.timeScale = 0`:** movimento, tiros, `WaitForSeconds` das ondas e o
+  cronômetro usam o tempo do jogo, então tudo para junto. O `Update` continua rodando,
+  por isso o Esc funciona na pausa.
+- **Um dono só para o Esc:** se o `BuildController` e o `GameManager` lessem o Esc, no
+  mesmo frame um fecharia o menu e o outro, já sem menu aberto, pausaria. O Esc agora é só
+  do `GameManager`, que pergunta ao `BuildController` se o menu está aberto (`IsMenuOpen`).
+- **Construção desligada na pausa e no fim** (`buildController.enabled = false`): com o
+  tempo parado o `Update` continua rodando, e daria para comprar naves com o jogo pausado.
+- **Vale o primeiro motivo de fim:** o último inimigo pode destruir a nave-mãe no mesmo
+  frame em que a onda acaba; o segundo aviso é ignorado.
+- **`Time.timeScale = 1` no `Awake`:** quando houver "Jogar de novo" (recarregar a cena),
+  o tempo estaria parado desde o fim da partida anterior.
+
+**Testado:** Esc fecha o menu e depois pausa/retoma; vitória ao fim das 3 ondas; derrota
+com a vida da nave-mãe em 2 e derrota por tempo com o limite em 20 s (valores de teste
+desfeitos depois).
+
+**Como testar:** Play na cena Game. Inspector do `GameManager` em modo Debug mostra o
+estado e o tempo restante; o fim da partida aparece no Console.

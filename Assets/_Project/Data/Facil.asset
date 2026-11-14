@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Facil
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.DifficultyData
   displayName: "F\xE1cil"
+  startingCredits: 100
+  motherShipHealth: 20
+  timeLimit: 240
   spawnInterval: 1.2
   timeBetweenWaves: 10
   healthMultiplier: 1

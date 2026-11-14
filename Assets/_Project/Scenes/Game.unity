@@ -119,6 +119,55 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &85030941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 85030943}
+  - component: {fileID: 85030942}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &85030942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85030941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c66d5638b73ee42fda674eb2f235e257, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.GameManager
+  difficulty: {fileID: 11400000, guid: 3dda20724470945b596df305ef97dd68, type: 2}
+  waveSpawner: {fileID: 370605708}
+  motherShip: {fileID: 756761257}
+  session: {fileID: 2018321956}
+  buildController: {fileID: 678412924}
+--- !u!4 &85030943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85030941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1, y: -0.25, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &224798850
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,7 +288,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfbadab902c6d4a2c9cb1733afc1605f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.WaveSpawner
-  difficulty: {fileID: 11400000, guid: 3dda20724470945b596df305ef97dd68, type: 2}
   bridges:
   - {fileID: 574509369}
   session: {fileID: 2018321956}
@@ -949,7 +997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6245328306d81464076442eb0630b166, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.MotherShip
-  maxHealth: 20
+  maxHealth: 2
 --- !u!61 &756761258
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1643,3 +1691,4 @@ SceneRoots:
   - {fileID: 2018321957}
   - {fileID: 678412926}
   - {fileID: 370605709}
+  - {fileID: 85030943}

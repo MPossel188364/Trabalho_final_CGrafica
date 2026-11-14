@@ -11,7 +11,7 @@ namespace NebulaGuard
     [RequireComponent(typeof(Collider2D))]
     public class MotherShip : MonoBehaviour
     {
-        [Tooltip("Valor provisório. Quando o DifficultyData existir (20 no Fácil, 15 no Difícil), a vida passa a vir dele.")]
+        [Tooltip("Usado só se não houver GameManager na cena; com ele, a vida vem do DifficultyData (20 no Fácil, 15 no Difícil).")]
         [Min(1)] [SerializeField] private int maxHealth = 20;
 
         private int currentHealth;
@@ -29,6 +29,14 @@ namespace NebulaGuard
         private void Awake()
         {
             currentHealth = maxHealth;
+        }
+
+        /// <summary>Define a vida máxima e enche a vida. Chamado pelo GameManager no início da partida.</summary>
+        public void Begin(int health)
+        {
+            maxHealth = Mathf.Max(1, health);
+            currentHealth = maxHealth;
+            HealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
         private void OnTriggerEnter2D(Collider2D other)

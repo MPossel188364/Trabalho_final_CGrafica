@@ -23,14 +23,23 @@ namespace NebulaGuard
 
     /// <summary>
     /// Dados de uma dificuldade (Fácil, Difícil): as ondas e o ritmo delas, e os
-    /// multiplicadores aplicados aos inimigos. Um asset por dificuldade.
-    /// Os outros números do plano (créditos iniciais, vida da nave-mãe, tempo máximo,
-    /// multiplicador de pontos) entram aqui quando quem os usa existir.
+    /// multiplicadores aplicados aos inimigos, e os números da partida (créditos iniciais,
+    /// vida da nave-mãe, tempo máximo). Um asset por dificuldade.
+    /// O multiplicador de pontos do plano entra aqui junto com o ranking.
     /// </summary>
     [CreateAssetMenu(fileName = "DifficultyData", menuName = "NebulaGuard/Difficulty Data")]
     public class DifficultyData : ScriptableObject
     {
         [SerializeField] private string displayName = "Fácil";
+
+        [Tooltip("Créditos com que o jogador começa.")]
+        [Min(0)] [SerializeField] private int startingCredits = 100;
+
+        [Tooltip("Vida da nave-mãe.")]
+        [Min(1)] [SerializeField] private int motherShipHealth = 20;
+
+        [Tooltip("Tempo máximo da partida, em segundos (conta a partir da primeira onda). Zerou com ondas por vir = derrota.")]
+        [Min(10f)] [SerializeField] private float timeLimit = 240f;
 
         [Tooltip("Segundos entre um inimigo e o próximo dentro da onda.")]
         [Min(0.05f)] [SerializeField] private float spawnInterval = 1.2f;
@@ -47,6 +56,9 @@ namespace NebulaGuard
         [SerializeField] private List<Wave> waves = new List<Wave>();
 
         public string DisplayName => displayName;
+        public int StartingCredits => startingCredits;
+        public int MotherShipHealth => motherShipHealth;
+        public float TimeLimit => timeLimit;
         public float SpawnInterval => spawnInterval;
         public float TimeBetweenWaves => timeBetweenWaves;
         public float HealthMultiplier => healthMultiplier;
