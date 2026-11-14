@@ -12,14 +12,13 @@ namespace NebulaGuard
     /// </summary>
     public class WaveSpawner : MonoBehaviour
     {
-        [SerializeField] private DifficultyData difficulty;
-
         [Tooltip("Pontes por onde os inimigos saem. Com mais de uma (Difícil), eles se alternam entre elas.")]
         [SerializeField] private LightBridge[] bridges;
 
         [Tooltip("Quem dá créditos e pontos quando um inimigo morre.")]
         [SerializeField] private GameSession session;
 
+        private DifficultyData difficulty;
         private int aliveInWave;
         private int nextBridge;
 
@@ -39,15 +38,26 @@ namespace NebulaGuard
         public int TotalWaves => difficulty != null ? difficulty.Waves.Count : 0;
         public bool Finished { get; private set; }
 
-        private void Start()
+        /// <summary>
+        /// Começa as ondas da dificuldade escolhida. Chamado pelo GameManager no início
+        /// da partida (é ele quem sabe a dificuldade).
+        /// </summary>
+        public void Begin(DifficultyData chosen)
         {
-            if (difficulty == null || bridges == null || bridges.Length == 0 || session == null)
+            if (chosen == null || bridges == null || bridges.Length == 0 || session == null)
             {
-                Debug.LogError($"{name}: preencha Difficulty, Bridges e Session no Inspector.", this);
+                Debug.LogError($"{name}: falta a dificuldade, ou Bridges e Session no Inspector.", this);
                 return;
             }
 
+            difficulty = chosen;
             StartCoroutine(RunWaves());
+        }
+
+        /// <summary>Para de soltar inimigos (fim de partida).</summary>
+        public void Stop()
+        {
+            StopAllCoroutines();
         }
 
         // Corrotina: uma função que pode pausar (yield) e continuar no frame seguinte ou

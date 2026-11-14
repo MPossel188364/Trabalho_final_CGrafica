@@ -102,6 +102,11 @@ Assets/_Project/
 - Ao duplicar um prefab de inimigo ou nave (`Cmd + D`), **trocar o campo Data**: a cópia
   continua apontando para o asset do original. Mudanças em ScriptableObject só vão para o
   disco com **File → Save Project** (o `Cmd + S` salva a cena).
+- **A dificuldade da partida mora no `GameManager`**: ele aplica os números
+  (`session.Begin`, `motherShip.Begin`) e começa as ondas (`waveSpawner.Begin`). Quem
+  precisar saber a dificuldade lê `GameManager.Difficulty`.
+- **O Esc é só do `GameManager`** (fecha o menu de construção, senão pausa). Tela nova que
+  precise do Esc deve passar por ele, não ler a tecla por conta própria.
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -151,8 +156,9 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
 | Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
-| GameSession | (0, 0) | — | — | — | créditos iniciais 100 (provisório, até o `DifficultyData`) |
-| WaveSpawner | (0, 0) | — | — | — | Difficulty = `Data/Facil`, Bridges = `LightBridge_A`, Session = `GameSession`; gera os inimigos (nenhum inimigo fica na cena antes do Play) |
+| GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
+| GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
+| WaveSpawner | (0, 0) | — | — | — | Bridges = `LightBridge_A`, Session = `GameSession`; a dificuldade vem do `GameManager` (`Begin`); gera os inimigos (nenhum inimigo fica na cena antes do Play) |
 | BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça |
 
 O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
@@ -187,6 +193,9 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
   `GameSession.Start` removidos
 - [x] Caça alienígena e Couraçado alienígena (`EnemyData` + prefab) nas ondas 2 e 3 do Fácil
 - [x] Balanceamento do Fácil testado (Caça com 3 de dano; valores no plano e no diário de 13/11)
-- [ ] HUD: contagem regressiva antes de cada onda (`WaveCountdownStarted`), onda atual,
+- [x] `GameManager`: estados, cronômetro (240 s no Fácil), pausa com Esc, vitória e
+  derrota; créditos, vida da nave-mãe e tempo vêm do `DifficultyData`
+- [ ] HUD: telas de pausa, vitória e derrota (`GameManager.StateChanged`), cronômetro
+  (`TimeRemaining`), contagem regressiva antes de cada onda (`WaveCountdownStarted`), onda atual,
   créditos, pontos e vida da nave-mãe
 - [ ] Fundo com estrelas (parallax)

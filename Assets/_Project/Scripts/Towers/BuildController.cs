@@ -20,6 +20,9 @@ namespace NebulaGuard
         private Camera cam;
         private BuildSlot selected;
 
+        /// <summary>Verdadeiro enquanto o menu de construção está aberto.</summary>
+        public bool IsMenuOpen => selected != null;
+
         private void Awake()
         {
             cam = Camera.main;
@@ -39,11 +42,9 @@ namespace NebulaGuard
 
         private void Update()
         {
+            // O Esc é tratado pelo GameManager (fecha este menu ou pausa o jogo),
+            // para as duas coisas não acontecerem no mesmo aperto.
             Mouse mouse = Mouse.current;
-            Keyboard keyboard = Keyboard.current;
-
-            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
-                CloseMenu();
 
             if (mouse == null || !mouse.leftButton.wasPressedThisFrame)
                 return;
@@ -67,7 +68,7 @@ namespace NebulaGuard
             menu.Show(slot.transform.position, towerPrefabs, session.Credits);
         }
 
-        private void CloseMenu()
+        public void CloseMenu()
         {
             selected = null;
             menu.Hide();

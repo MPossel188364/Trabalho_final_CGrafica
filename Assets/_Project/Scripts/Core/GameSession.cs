@@ -10,7 +10,7 @@ namespace NebulaGuard
     /// </summary>
     public class GameSession : MonoBehaviour
     {
-        [Tooltip("Valor provisório. Quando o DifficultyData existir, os créditos iniciais passam a vir dele.")]
+        [Tooltip("Usado só se não houver GameManager na cena; com ele, os créditos iniciais vêm do DifficultyData.")]
         [Min(0)] [SerializeField] private int startingCredits = 100;
 
         private int credits;
@@ -29,6 +29,15 @@ namespace NebulaGuard
         {
             credits = startingCredits;
             score = 0;
+        }
+
+        /// <summary>Recomeça a partida com estes créditos e zero pontos. Chamado pelo GameManager.</summary>
+        public void Begin(int initialCredits)
+        {
+            credits = Mathf.Max(0, initialCredits);
+            score = 0;
+            CreditsChanged?.Invoke(credits);
+            ScoreChanged?.Invoke(score);
         }
 
         /// <summary>
