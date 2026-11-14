@@ -534,3 +534,51 @@ desfeitos depois).
 
 **Como testar:** Play na cena Game. Inspector do `GameManager` em modo Debug mostra o
 estado e o tempo restante; o fim da partida aparece no Console.
+
+## 2026-11-14 — HUD: barra do topo, contagem, pausa e fim de partida
+
+**O que foi feito:**
+- `Scripts/UI/HUD.cs`: escuta os eventos do jogo e atualiza a interface. Barra do topo com
+  vida da nave-mãe (barra + "atual/máx"), onda ("Onda 1/3"), cronômetro (m:ss), créditos e
+  pontos; contagem "Onda N em 10, 9, 8…" antes de cada onda; tela de pausa com botão
+  "Continuar"; tela de fim com "VITÓRIA" (verde) ou "DERROTA" (vermelho), pontos e botão
+  "Jogar de novo".
+- Na cena Game, `HUD_Canvas` montado à mão no editor (uGUI + TextMeshPro), com
+  `EventSystem` usando o `InputSystemUIInputModule`. Importado o **TMP Essentials**
+  (pasta `Assets/TextMesh Pro`, necessária para as fontes do TextMeshPro).
+- Hierarquia: `TopBar` (`HealthBG` → `HealthFill`, `HealthText`; `WaveText`, `TimerText`,
+  `CreditsText`, `ScoreText`), `CountdownText`, `PausePanel`, `EndPanel`.
+
+**Por quê assim:**
+- **Interface montada no editor, não por código** (diferente do `BuildMenuUI`): a barra e
+  as telas são fixas, e no editor dá para ver e ajustar o layout sem dar Play. O script só
+  recebe as referências.
+- **O HUD só escuta.** `GameManager.StateChanged`, `WaveSpawner.WaveCountdownStarted` e
+  `WaveStarted`, `GameSession.CreditsChanged` e `ScoreChanged`, `MotherShip.HealthChanged`.
+  Nenhum script de jogo conhece o HUD; dá para tirar o HUD da cena e o jogo continua.
+- **Cronômetro lido no `Update`:** muda todo frame, um evento por frame não ajudaria.
+- **Assina no `OnEnable`:** roda antes de qualquer `Start`, então o HUD já está escutando
+  quando o `GameManager.Start` aplica créditos e vida — a tela abre com os números certos.
+- **"Onda 0/3" na contagem da primeira onda**, e não ao entrar em `Preparing`: nesse
+  momento o `WaveSpawner` ainda não recebeu a dificuldade e `TotalWaves` é 0.
+- **Botões ligados por código** (`onClick.AddListener`): menos um passo manual no Inspector.
+- **"Jogar de novo" recarrega a cena** (`SceneManager.LoadScene`): tudo volta ao estado
+  inicial sem código de "reset". O `Time.timeScale = 1` do `GameManager.Awake` destrava o
+  tempo parado pelo fim da partida.
+- **Âncoras:** a `TopBar` é top-stretch (presa ao topo, largura da tela); cada filho é
+  preso à borda esquerda, ao centro ou à borda direita da barra. Com o Canvas Scaler em
+  Scale With Screen Size (1920×1080), o HUD fica no lugar em qualquer resolução.
+
+**Problemas no caminho:**
+- Ao trocar a âncora sem **Alt + Shift**, o Unity mantém a posição antiga: a `TopBar`
+  ficou com Pos Y -490 e 100 px de largura (uma caixa preta no meio). Correção: Left = 0,
+  Right = 0, Pos Y = 0.
+- "PAUSADO", "VITÓRIA" e "DERROTA" quebravam em várias linhas: texto TMP novo nasce com
+  200 × 50. Correção: caixa maior e **Wrapping = Disabled**.
+- O texto de um botão fica no filho `Text (TMP)`, não no objeto do botão.
+
+**Como testar:** Play na cena Game. Contagem "Onda 1 em 10…" com o cronômetro parado em
+4:00; ao começar a onda, "Onda 1/3" e o tempo corre; créditos e pontos mudam ao comprar e
+matar; a barra de vida desce quando um inimigo chega à base; Esc abre a pausa e
+"Continuar" volta; no fim aparece vitória ou derrota com os pontos e "Jogar de novo"
+recomeça.
