@@ -107,6 +107,10 @@ Assets/_Project/
   precisar saber a dificuldade lê `GameManager.Difficulty`.
 - **O Esc é só do `GameManager`** (fecha o menu de construção, senão pausa). Tela nova que
   precise do Esc deve passar por ele, não ler a tecla por conta própria.
+- **O `HUD` é montado no editor** (`HUD_Canvas`, uGUI + **TextMeshPro**, Canvas Scaler
+  1920×1080) e só escuta eventos; dado que muda todo frame (cronômetro) é lido no `Update`.
+  Ao trocar a âncora de um elemento, segurar **Alt + Shift** ou redigitar posição e tamanho
+  (o Unity mantém a posição antiga). Texto TMP grande: **Wrapping = Disabled**.
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -160,6 +164,8 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
 | WaveSpawner | (0, 0) | — | — | — | Bridges = `LightBridge_A`, Session = `GameSession`; a dificuldade vem do `GameManager` (`Begin`); gera os inimigos (nenhum inimigo fica na cena antes do Play) |
 | BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça |
+| HUD_Canvas | — | — | — | — | Canvas Scaler 1920×1080 (match 0,5), componente `HUD`; filhos `TopBar`, `CountdownText`, `PausePanel`, `EndPanel` |
+| EventSystem | — | — | — | — | `InputSystemUIInputModule` |
 
 O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
 
@@ -195,7 +201,6 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
 - [x] Balanceamento do Fácil testado (Caça com 3 de dano; valores no plano e no diário de 13/11)
 - [x] `GameManager`: estados, cronômetro (240 s no Fácil), pausa com Esc, vitória e
   derrota; créditos, vida da nave-mãe e tempo vêm do `DifficultyData`
-- [ ] HUD: telas de pausa, vitória e derrota (`GameManager.StateChanged`), cronômetro
-  (`TimeRemaining`), contagem regressiva antes de cada onda (`WaveCountdownStarted`), onda atual,
-  créditos, pontos e vida da nave-mãe
+- [x] HUD (`UI/HUD.cs` + `HUD_Canvas` na cena): vida da nave-mãe, onda, cronômetro, créditos e
+  pontos no topo; contagem antes de cada onda; telas de pausa e de fim com "Jogar de novo"
 - [ ] Fundo com estrelas (parallax)
