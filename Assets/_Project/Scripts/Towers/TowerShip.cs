@@ -26,6 +26,7 @@ namespace NebulaGuard
 
         // Reaproveitada a cada busca para não criar uma lista nova por frame.
         private readonly List<Collider2D> hits = new List<Collider2D>();
+        private readonly List<Enemy> clustered = new List<Enemy>(); // só usada na mira do Bombardeiro
         private ContactFilter2D filter;
         private float cooldown;
         private Enemy target;
@@ -63,6 +64,10 @@ namespace NebulaGuard
         {
             Physics2D.OverlapCircle(transform.position, data.Range, filter, hits);
 
+            // Bombardeiro: mira no maior grupo. Os outros modos seguem o caminho abaixo, como antes.
+            if (data.Targeting == TargetingMode.MostClustered)
+                return FindMostClustered();
+
             Enemy best = null;
             foreach (Collider2D col in hits)
             {
@@ -71,6 +76,42 @@ namespace NebulaGuard
 
                 if (best == null || IsBetterTarget(enemy, best))
                     best = enemy;
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// Escolhe o inimigo que tem mais inimigos dentro do raio da explosão (ele mesmo conta),
+        /// para o míssil pegar o maior grupo. Empate: o mais perto da nave-mãe.
+        /// </summary>
+        private Enemy FindMostClustered()
+        {
+            clustered.Clear();
+            foreach (Collider2D col in hits)
+            {
+                if (col.TryGetComponent(out Enemy enemy) && enemy.IsAlive)
+                    clustered.Add(enemy);
+            }
+
+            float radiusSqr = data.SplashRadius * data.SplashRadius;
+            Enemy best = null;
+            int bestCount = 0;
+
+            foreach (Enemy candidate in clustered)
+            {
+                int count = 0;
+                foreach (Enemy neighbour in clustered)
+                {
+                    Vector2 offset = (Vector2)neighbour.transform.position - (Vector2)candidate.transform.position;
+                    if (offset.sqrMagnitude <= radiusSqr)
+                        count++;
+                }
+
+                if (count > bestCount || (count == bestCount && best != null && candidate.DistanceTravelled > best.DistanceTravelled))
+                {
+                    best = candidate;
+                    bestCount = count;
+                }
             }
             return best;
         }
@@ -108,7 +149,7 @@ namespace NebulaGuard
 
             Transform origin = muzzle != null ? muzzle : transform;
             Projectile shot = Instantiate(data.ProjectilePrefab, origin.position, transform.rotation);
-            shot.Launch(target, data.Damage, data.ProjectileSpeed);
+            shot.Launch(target, data.Damage, data.ProjectileSpeed, data.SplashRadius);
         }
 
         // Chamado ao adicionar o componente: já marca a layer Enemy.
