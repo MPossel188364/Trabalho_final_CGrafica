@@ -582,3 +582,87 @@ estado e o tempo restante; o fim da partida aparece no Console.
 matar; a barra de vida desce quando um inimigo chega à base; Esc abre a pausa e
 "Continuar" volta; no fim aparece vitória ou derrota com os pontos e "Jogar de novo"
 recomeça.
+
+---
+
+## 2026-11-15 — Naves-torre, parte 2: Bombardeiro e Cruzador
+
+**Feito:**
+- `TowerData.cs`: campo `splashRadius` (raio da explosão; 0 = sem dano em área) e
+  um valor novo, `MostClustered`, no `TargetingMode`.
+- `Projectile.cs`: o `Launch` ganhou o parâmetro opcional `newSplashRadius`. Com
+  raio maior que 0, o projétil explode ao tocar o primeiro inimigo e os outros
+  inimigos dentro do raio levam o mesmo dano.
+- `TowerShip.cs`: mira `MostClustered` (método `FindMostClustered`) e repasse do
+  raio ao projétil.
+- Assets e prefabs novos: `Data/Bombardeiro.asset`, `Data/Cruzador.asset`,
+  `Prefabs/Bombardeiro.prefab`, `Prefabs/Missil_Bombardeiro.prefab`,
+  `Prefabs/Cruzador.prefab` e `Prefabs/Raio_Cruzador.prefab`.
+
+**Valores** (do documento de design; são o ponto de partida do balanceamento):
+
+| Nave | Custo | Alcance | Tiros/s | Dano | Velocidade do projétil | Mira |
+| --- | --- | --- | --- | --- | --- | --- |
+| Bombardeiro | 80 | 3 | 0,6 | 20 em área (raio 1,2) | 8 | onde há mais inimigos juntos |
+| Cruzador | 120 | 7 | 0,5 | 40 | 30 | o inimigo com mais vida |
+
+**Por quê assim:**
+- **O Caça não mudou.** O raio da explosão tem padrão 0 e o `MostClustered` foi
+  acrescentado no fim do enum, então o número salvo no `Caca.asset` continua
+  valendo o mesmo. `Caca.asset`, `Caca.prefab`, `Laser_Caca.prefab` e a cena
+  `Game.unity` não foram tocados.
+- **Mesmo `TowerShip` e mesmo `Projectile` para as três naves.** O que muda de uma
+  nave para outra são os números (assets) e o visual (prefab). O Cruzador não
+  precisou de código novo: a mira `Strongest` (mais vida) já existia.
+- **O dano em área fica no projétil, não na nave.** Quem sabe onde a explosão
+  acontece é o projétil, no momento em que toca o inimigo. O inimigo tocado leva o
+  dano uma vez e é pulado na explosão, para não levar duas.
+- **Mira do Bombardeiro.** Para cada inimigo no alcance, conta quantos inimigos
+  (ele mesmo incluído) estão dentro do raio da explosão e escolhe o que tem o
+  maior número. Empate: o mais adiantado na ponte. São poucos inimigos no alcance,
+  então a conta dupla por frame não pesa.
+- **A busca da explosão usa só a layer `Enemy`**, igual à busca das torres.
+- **Os prefabs e assets foram criados por cópia** dos do Caça e do `Laser_Caca`,
+  trocando só nome, escala, cor, números e as referências entre eles. Foi feito
+  sem o Unity aberto, e as referências (GUIDs e fileIDs) foram conferidas por
+  script.
+- **A cena não foi editada.** Se algum prefab novo tiver problema ao importar, o
+  fluxo do Caça continua funcionando. As naves entram no menu quando são
+  adicionadas à lista do `BuildController` (passo 3 abaixo).
+
+**Ainda não tem (fica para a etapa de efeitos):** efeito visual na explosão e
+rastro de fumaça no míssil (o plano os coloca na etapa de efeitos), som, e sprites
+próprios: as naves novas usam o mesmo sprite do Caça, com escala e cor diferentes
+(Bombardeiro larga e laranja, Cruzador comprido e azul).
+
+**Não compilado nem testado no Unity** (escrito sem o editor aberto): a primeira
+abertura do projeto é o teste.
+
+**Como testar:**
+1. Abra o projeto no Unity (6000.3.27f1) e espere a importação. O Console não deve
+   mostrar erro vermelho. Se mostrar, pare aqui e copie a mensagem.
+2. Em `Assets/_Project/Data`, clique em `Bombardeiro`: Cost 80, Range 3, Splash
+   Radius 1,2, Targeting `MostClustered` e Projectile Prefab `Missil_Bombardeiro`.
+   Em `Assets/_Project/Prefabs`, clique em `Bombardeiro` e `Cruzador`: o `TowerShip`
+   deve mostrar o campo Data preenchido, sem "Missing".
+3. Abra a cena Game e selecione `BuildController` na Hierarchy. Em **Tower Prefabs**,
+   mude o Size de 1 para 3. O Element 0 continua `Caca`; arraste `Bombardeiro` para
+   o Element 1 e `Cruzador` para o Element 2.
+4. Dê Play e clique num slot livre: o menu deve mostrar Caça — 50, Bombardeiro — 80
+   e Cruzador — 120, com desligados os botões que não cabem no saldo. O Fácil começa
+   com 100 créditos, então no começo o Cruzador aparece desligado; ele libera depois
+   que os drones destruídos (+5 cada) somarem o saldo.
+5. **Caça (nada pode ter mudado):** compre e confira que atira e mata o drone como
+   antes.
+6. **Bombardeiro:** posicione perto de onde os drones passam juntos. O míssil laranja
+   persegue o alvo e, ao acertar, **todos** os drones dentro do raio (1,2) levam 20
+   de dano ao mesmo tempo. O drone tem 25 de vida, então o primeiro míssil deixa o
+   grupo com 5 e o segundo o elimina junto. Para conferir, compare com o Caça: ele
+   só machuca um drone por vez.
+7. **Cruzador:** o raio azul sai de longe (alcance 7) e, quando há inimigos de vidas
+   diferentes no alcance, ele atira primeiro no de mais vida (na onda 3, o
+   Couraçado, com 150, antes dos drones e do caça alienígena). Cada tiro tira 40,
+   então um drone (25 de vida) morre com um tiro.
+8. Deu certo: salve a cena (Ctrl+S) e commite `Assets/_Project/Scenes/Game.unity`.
+   O diff deve ter só duas linhas novas na lista do `BuildController`. Se algo deu
+   errado, desfaça o passo 3 e o jogo volta a ser o de antes.

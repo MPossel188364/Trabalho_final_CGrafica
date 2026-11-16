@@ -75,6 +75,9 @@ Assets/_Project/
 - Avisar a interface por **eventos C#** (`System.Action`), sem o script de jogo
   conhecer o HUD.
 - Todo movimento multiplicado por `Time.deltaTime`; pausa via `Time.timeScale = 0`.
+- Dano em área: `SplashRadius` no `TowerData` (0 = sem área). O `Projectile` explode no
+  primeiro inimigo que toca e tira o mesmo dano dos vizinhos no raio, buscando só na
+  layer `Enemy`. A mira `MostClustered` escolhe o inimigo com mais vizinhos nesse raio.
 - **Materiais sempre do URP**, nunca os embutidos do pipeline antigo
   (`Sprites-Default`, `Default-Line`): esses não respondem ao Bloom nem às luzes
   2D. Ficam em Packages → Universal RP → Runtime → Materials.
@@ -203,4 +206,15 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
   derrota; créditos, vida da nave-mãe e tempo vêm do `DifficultyData`
 - [x] HUD (`UI/HUD.cs` + `HUD_Canvas` na cena): vida da nave-mãe, onda, cronômetro, créditos e
   pontos no topo; contagem antes de cada onda; telas de pausa e de fim com "Jogar de novo"
+- [x] Bombardeiro e Cruzador: `TowerData.SplashRadius`, mira `MostClustered`, assets e
+  prefabs das naves e dos projéteis (`Missil_Bombardeiro`, `Raio_Cruzador`). Escritos
+  sem o Unity aberto, **ainda não compilados nem testados**
+- [ ] Ligar o Bombardeiro e o Cruzador no `BuildController` da cena (lista Tower Prefabs)
+  e testar (passo a passo na entrada de 15/11 do `docs/DIARIO.md`)
 - [ ] Fundo com estrelas (parallax)
+- [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
+- [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
+- [ ] Efeitos e sons: partículas, Bloom, tremida de câmera, SFX e música (inclui a explosão
+  e o rastro de fumaça do míssil do Bombardeiro)
+- [ ] Astronauta (opcional; é o primeiro a cortar se o prazo apertar)
+- [ ] Build Windows, vídeo demonstrativo e links no README
