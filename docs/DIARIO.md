@@ -663,6 +663,8 @@ abertura do projeto é o teste.
    diferentes no alcance, ele atira primeiro no de mais vida (na onda 3, o
    Couraçado, com 150, antes dos drones e do caça alienígena). Cada tiro tira 40,
    então um drone (25 de vida) morre com um tiro.
-8. Deu certo: salve a cena (Ctrl+S) e commite `Assets/_Project/Scenes/Game.unity`.
-   O diff deve ter só duas linhas novas na lista do `BuildController`. Se algo deu
+8. Deu certo: salve a cena (Ctrl+S no Windows, Cmd+S no Mac) e commite
+   `Assets/_Project/Scenes/Game.unity`. O diff deve ter só duas linhas novas na lista
+   do `BuildController`. Se mexer nos números dos assets das naves ao balancear, use
+   **File → Save Project** (a cena salva não grava ScriptableObject). Se algo deu
    errado, desfaça o passo 3 e o jogo volta a ser o de antes.
