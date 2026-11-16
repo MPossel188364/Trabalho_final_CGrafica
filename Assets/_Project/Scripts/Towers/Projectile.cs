@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NebulaGuard
@@ -5,7 +6,8 @@ namespace NebulaGuard
     /// <summary>
     /// Projétil disparado por uma nave-torre. Persegue o alvo e, ao tocar um inimigo
     /// (trigger), tira vida dele e some. Se o alvo morrer no caminho, segue reto na
-    /// última direção e some sozinho depois de um tempo.
+    /// última direção e some sozinho depois de um tempo. Se a nave definiu um raio de
+    /// explosão (Bombardeiro), os outros inimigos dentro do raio também levam o dano.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class Projectile : MonoBehaviour
@@ -19,15 +21,20 @@ namespace NebulaGuard
         private Enemy target;
         private float damage;
         private float speed;
+        private float splashRadius;
         private Vector2 direction;
         private bool hit;
 
-        /// <summary>A nave chama logo depois de instanciar o projétil no cano.</summary>
-        public void Launch(Enemy newTarget, float newDamage, float newSpeed)
+        /// <summary>
+        /// A nave chama logo depois de instanciar o projétil no cano. O raio da explosão é
+        /// opcional: 0 (o padrão) = só o inimigo atingido leva dano, como sempre foi.
+        /// </summary>
+        public void Launch(Enemy newTarget, float newDamage, float newSpeed, float newSplashRadius = 0f)
         {
             target = newTarget;
             damage = newDamage;
             speed = newSpeed;
+            splashRadius = newSplashRadius;
             direction = transform.up;
             Destroy(gameObject, lifetime);
         }
@@ -58,7 +65,32 @@ namespace NebulaGuard
 
             hit = true;
             enemy.TakeDamage(damage);
+
+            if (splashRadius > 0f)
+                DamageNearby(enemy);
+
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Explosão: os outros inimigos vivos dentro do raio levam o mesmo dano. O inimigo
+        /// que o projétil tocou já levou o dano acima, então é pulado (não leva duas vezes).
+        /// </summary>
+        private void DamageNearby(Enemy alreadyHit)
+        {
+            // Mesma busca da TowerShip: só a layer Enemy, e os inimigos usam collider trigger.
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(LayerMask.GetMask("Enemy"));
+            filter.useTriggers = true;
+
+            var nearby = new List<Collider2D>();
+            Physics2D.OverlapCircle(transform.position, splashRadius, filter, nearby);
+
+            foreach (Collider2D col in nearby)
+            {
+                if (col.TryGetComponent(out Enemy neighbour) && neighbour != alreadyHit && neighbour.IsAlive)
+                    neighbour.TakeDamage(damage);
+            }
         }
 
         // Kinematic: movido por código, mas os triggers funcionam (igual ao Enemy).

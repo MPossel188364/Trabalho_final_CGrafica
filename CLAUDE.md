@@ -46,7 +46,7 @@ Assets/_Project/
     Core/      GameManager, GameSession, MotherShip, Ranking, AudioManager
     Data/      TowerData, EnemyData, DifficultyData
     Enemies/   Enemy, LightBridge, WaveSpawner
-    Towers/    TowerShip, Projectile, BuildSlot
+    Towers/    TowerShip, Projectile, BuildSlot, BuildController
     Player/    Astronaut
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
@@ -75,6 +75,9 @@ Assets/_Project/
 - Avisar a interface por **eventos C#** (`System.Action`), sem o script de jogo
   conhecer o HUD.
 - Todo movimento multiplicado por `Time.deltaTime`; pausa via `Time.timeScale = 0`.
+- Dano em área: `SplashRadius` no `TowerData` (0 = sem área). O `Projectile` explode no
+  primeiro inimigo que toca e tira o mesmo dano dos vizinhos no raio, buscando só na
+  layer `Enemy`. A mira `MostClustered` escolhe o inimigo com mais vizinhos nesse raio.
 - **Materiais sempre do URP**, nunca os embutidos do pipeline antigo
   (`Sprites-Default`, `Default-Line`): esses não respondem ao Bloom nem às luzes
   2D. Ficam em Packages → Universal RP → Runtime → Materials.
@@ -176,6 +179,22 @@ Kenney.
 Os corredores entre as colunas da ponte (x ≈ -6, 0 e 6) são onde ficarão os
 pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenhada.
 
+## Naves-torre (valores atuais)
+
+Os números moram nos assets de `Data/`, que são a fonte da verdade; esta tabela é só uma
+cópia para consulta e pode ficar para trás se alguém balancear. O doc de design traz valores
+iniciais um pouco diferentes (o Caça foi rebalanceado de 5 para 3 de dano).
+
+| Nave | Custo | Alcance | Tiros/s | Dano | Raio da explosão | Vel. do projétil | Giro (°/s) | Mira |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Caça | 50 | 3,5 | 3 | 3 | 0 (sem área) | 14 | 540 | `First` (o mais perto da nave-mãe) |
+| Bombardeiro | 80 | 3 | 0,6 | 20 | 1,2 | 8 | 180 | `MostClustered` (o do maior grupo) |
+| Cruzador | 120 | 7 | 0,5 | 40 | 0 (sem área) | 30 | 270 | `Strongest` (o de mais vida) |
+
+Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projéteis
+`Laser_Caca`, `Missil_Bombardeiro` e `Raio_Cruzador`. Por enquanto só o Caça está na lista
+`Tower Prefabs` do `BuildController` da cena.
+
 ## Estado atual
 
 - [x] `.gitignore` e `.gitattributes` de Unity na raiz
@@ -203,4 +222,18 @@ pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenh
   derrota; créditos, vida da nave-mãe e tempo vêm do `DifficultyData`
 - [x] HUD (`UI/HUD.cs` + `HUD_Canvas` na cena): vida da nave-mãe, onda, cronômetro, créditos e
   pontos no topo; contagem antes de cada onda; telas de pausa e de fim com "Jogar de novo"
+- [x] Bombardeiro e Cruzador: **código e assets escritos, ainda não compilados nem testados
+  no Unity** (feitos sem o editor aberto; estão na branch `feature/torres-bombardeiro-cruzador`,
+  tirar esta nota ao fazer o merge). `TowerData.SplashRadius`, mira `MostClustered` e dano em
+  área no `Projectile`; `Data/Bombardeiro.asset` e `Data/Cruzador.asset`; prefabs das naves e
+  dos projéteis (valores na tabela "Naves-torre")
+- [ ] Testar no Unity e ligar as duas naves no `BuildController` da cena (lista Tower Prefabs,
+  de 1 para 3 elementos). **A cena ainda não foi alterada.** Passo a passo na entrada de 15/11
+  do `docs/DIARIO.md`; depois de testar, salvar a cena e commitar o `Game.unity`
 - [ ] Fundo com estrelas (parallax)
+- [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
+- [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
+- [ ] Efeitos e sons: partículas, Bloom, tremida de câmera, SFX e música (inclui a explosão
+  e o rastro de fumaça do míssil do Bombardeiro)
+- [ ] Astronauta (opcional; é o primeiro a cortar se o prazo apertar)
+- [ ] Build Windows, vídeo demonstrativo e links no README

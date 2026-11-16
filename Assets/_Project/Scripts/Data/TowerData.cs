@@ -10,6 +10,12 @@ namespace NebulaGuard
 
         /// <summary>O que tem mais vida no momento (Cruzador).</summary>
         Strongest,
+
+        /// <summary>
+        /// O que tem mais inimigos dentro do raio da explosão (Bombardeiro). Vem depois dos
+        /// outros de propósito: o valor numérico salvo nos assets existentes não muda.
+        /// </summary>
+        MostClustered,
     }
 
     /// <summary>
@@ -34,6 +40,9 @@ namespace NebulaGuard
         [Tooltip("Dano de cada projétil.")]
         [Min(0f)] [SerializeField] private float damage = 5f;
 
+        [Tooltip("Raio da explosão do projétil, em unidades. 0 = sem dano em área: só o inimigo atingido leva dano (Caça e Cruzador).")]
+        [Min(0f)] [SerializeField] private float splashRadius = 0f;
+
         [Tooltip("Velocidade do projétil, em unidades por segundo.")]
         [Min(0.1f)] [SerializeField] private float projectileSpeed = 14f;
 
@@ -50,6 +59,7 @@ namespace NebulaGuard
         public float Range => range;
         public float FireRate => fireRate;
         public float Damage => damage;
+        public float SplashRadius => splashRadius;
         public float ProjectileSpeed => projectileSpeed;
         public float TurnSpeed => turnSpeed;
         public TargetingMode Targeting => targeting;
