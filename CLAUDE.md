@@ -43,13 +43,13 @@ separa do que pacotes e o template criam):
 ```
 Assets/_Project/
   Scripts/
-    Core/      GameManager, GameSession, MotherShip, Ranking, AudioManager
+    Core/      GameManager, GameSession, GameSettings, MotherShip, Ranking, AudioManager
     Data/      TowerData, EnemyData, DifficultyData
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
-    Editor/    BuildSlotSetup, HudStyleSetup (só existem no editor, não entram no build)
+    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
   Prefabs/     naves, inimigos, projéteis, efeitos
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
@@ -126,6 +126,20 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 - **A dificuldade da partida mora no `GameManager`**: ele aplica os números
   (`session.Begin`, `motherShip.Begin`) e começa as ondas (`waveSpawner.Begin`). Quem
   precisar saber a dificuldade lê `GameManager.Difficulty`.
+- **A dificuldade vem do menu por `GameSettings.SelectedDifficulty`** (classe estática: sobrevive
+  à troca de cena). O `GameManager` a usa no `Awake`; se for nula (cena Game aberta direto no
+  editor), vale a do campo `Difficulty` dele. Cena nova que dependa do `GameManager` precisa
+  estar no Build Settings; o **MainMenu é o índice 0** (o `.exe` abre por ele).
+- **Pontos = pontos do inimigo × `ScoreMultiplier` da dificuldade**, aplicado no
+  `GameSession.AddScore`; por isso HUD, tela de fim e ranking mostram o mesmo número.
+- **Ranking** (`Core/Ranking.cs`, classe estática, top 5 em `PlayerPrefs`): o `GameManager` chama
+  `Ranking.Submit` ao fim de **toda** partida (vitória ou derrota) e guarda a posição em
+  `LastRankingPosition`, que o HUD mostra. Partida com 0 pontos não entra; empate fica atrás de
+  quem já estava.
+- **Quantas pontes a partida usa vem da dificuldade** (`BridgeCount`: Fácil 1, Difícil 2). O
+  `WaveSpawner` liga só essas e desliga as outras junto com o portal delas (`Second Bridge
+  Objects`). Ponte nova = filha de nada: o `LightBridge` trata **todo filho como waypoint**, então
+  o portal não pode ser filho da ponte.
 - **O Esc é só do `GameManager`** (fecha o menu de construção, senão pausa). Tela nova que
   precise do Esc deve passar por ele, não ler a tecla por conta própria.
 - **O `HUD` é montado no editor** (`HUD_Canvas`, uGUI + **TextMeshPro**, Canvas Scaler
@@ -188,6 +202,8 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1, **Target Sorting Layers = All** |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
 | Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Lit-Default | sprite `Art/Base/Portal` (Kenney) |
+| LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-14, 0) → (12, 0), reta. Criada por **Adicionar ponte do Difícil** |
+| Portal_B | (-14.8, 0) | 1.8 | Ships | Sprite-Lit-Default | **só no Difícil**; cópia do Portal_A, em `Second Bridge Objects` do `WaveSpawner` |
 | Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,35, que cobre a nave posicionada) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
@@ -207,7 +223,9 @@ copiadas para `Art/` (com nomes do jogo); `Art/CREDITOS.txt` diz de qual arquivo
 cada uma. Os slots de construção ainda são círculos provisórios.
 
 Os corredores entre as colunas da ponte (x ≈ -6, 0 e 6) são onde ficarão os
-pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenhada.
+pontos de ancoragem das torres. A segunda ponte (Difícil) é uma reta em y = 0: passa entre as
+duas fileiras de slots (y = ±2), a 2 unidades de cada uma, dentro do alcance de todas as naves
+(Caça 3,5). Tem ~26 unidades, contra ≈ 55 da ponte A: é o caminho curto e rápido.
 
 ## Naves-torre (valores atuais)
 
@@ -264,8 +282,25 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   onda, moeda, estrela), barra de vida que muda de cor, cronômetro em alerta nos últimos 30 s,
   botões da Kenney e tela de fim com motivo e fade (`Editor/HudStyleSetup.cs`)
 - [x] Menu de compra e venda no mesmo estilo (TMP, botões da Kenney, desenho da nave, nave cara apagada)
-- [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
-- [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
+- [x] **Menu principal, Ranking e Sobre — código pronto:** `UI/MainMenu.cs` (Jogar com escolha de
+  dificuldade, Ranking, Sobre, Sair; montado por código), `Core/Ranking.cs`, `Core/GameSettings.cs`,
+  multiplicador de pontos (`DifficultyData.ScoreMultiplier`), botão "Menu principal" na pausa e no
+  fim (`HUD`) e a ferramenta `Editor/MainMenuSetup.cs` (**NebulaGuard → Montar cena MainMenu**)
+- [ ] **Falta montar e testar o menu no Unity:** rodar **NebulaGuard → Montar cena MainMenu** (cria
+  `Scenes/MainMenu.unity`, põe as 2 cenas no Build Settings e acrescenta os botões na cena Game),
+  dar Play na MainMenu e conferir: Jogar → dificuldade → partida; Menu principal na pausa e no
+  fim volta; a posição no ranking aparece na tela de fim; Ranking e Sobre abrem. **Escrever os
+  nomes do grupo** no campo `About Text` do objeto `MainMenu`. Commitar as cenas, o
+  `EditorBuildSettings.asset` e os `.meta`
+- [x] **Difícil — dados e código prontos:** `Data/Dificil.asset` (5 ondas, 50 inimigos, nave-mãe 15,
+  300 s, +25% vida, +15% velocidade, venda 70%, pontos ×2), `DifficultyData.BridgeCount`, uso das
+  pontes no `WaveSpawner` e a ferramenta `Editor/HardModeSetup.cs`
+  (**NebulaGuard → Adicionar ponte do Difícil**)
+- [ ] **Falta no Difícil:** rodar a ferramenta acima (cria `LightBridge_B` e `Portal_B` na cena
+  Game), jogar no Difícil e **balancear** (os números do asset são um primeiro palpite, nunca
+  testados) e atualizar a tabela de dificuldades do plano. Se alguém rodar o **Montar cena
+  MainMenu** antes do Dificil existir, a lista do menu fica só com o Fácil: a ferramenta do
+  Difícil a completa
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
   e o rastro de fumaça do míssil do Bombardeiro)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual

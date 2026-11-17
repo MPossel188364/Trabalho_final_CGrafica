@@ -15,6 +15,7 @@ namespace NebulaGuard
 
         private int credits;
         private int score;
+        private float scoreMultiplier = 1f;
 
         public int Credits => credits;
         public int Score => score;
@@ -31,11 +32,15 @@ namespace NebulaGuard
             score = 0;
         }
 
-        /// <summary>Recomeça a partida com estes créditos e zero pontos. Chamado pelo GameManager.</summary>
-        public void Begin(int initialCredits)
+        /// <summary>
+        /// Recomeça a partida com estes créditos e zero pontos. Chamado pelo GameManager.
+        /// O multiplicador (da dificuldade) vale para todos os pontos ganhos depois.
+        /// </summary>
+        public void Begin(int initialCredits, float newScoreMultiplier = 1f)
         {
             credits = Mathf.Max(0, initialCredits);
             score = 0;
+            scoreMultiplier = newScoreMultiplier;
             CreditsChanged?.Invoke(credits);
             ScoreChanged?.Invoke(score);
         }
@@ -75,7 +80,9 @@ namespace NebulaGuard
             if (amount <= 0)
                 return;
 
-            score += amount;
+            // O multiplicador entra aqui, e não no ranking: assim o HUD, a tela de fim e o
+            // ranking mostram sempre o mesmo número.
+            score += Mathf.RoundToInt(amount * scoreMultiplier);
             ScoreChanged?.Invoke(score);
         }
 
