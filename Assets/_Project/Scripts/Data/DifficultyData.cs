@@ -58,10 +58,14 @@ namespace NebulaGuard
         [Tooltip("Multiplica os pontos ganhos ao destruir inimigos (o Difícil vale mais no ranking).")]
         [Min(0.1f)] [SerializeField] private float scoreMultiplier = 1f;
 
+        [Tooltip("Quantas pontes de luz a partida usa, na ordem da lista Bridges do WaveSpawner (Fácil = 1, Difícil = 2). Com mais de uma, os inimigos se alternam entre elas.")]
+        [Min(1)] [SerializeField] private int bridgeCount = 1;
+
         [SerializeField] private List<Wave> waves = new List<Wave>();
 
         public string DisplayName => displayName;
         public float ScoreMultiplier => scoreMultiplier;
+        public int BridgeCount => bridgeCount;
         public int StartingCredits => startingCredits;
         public int MotherShipHealth => motherShipHealth;
         public float TimeLimit => timeLimit;

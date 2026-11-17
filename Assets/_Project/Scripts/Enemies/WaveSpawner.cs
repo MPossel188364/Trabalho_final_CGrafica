@@ -12,8 +12,11 @@ namespace NebulaGuard
     /// </summary>
     public class WaveSpawner : MonoBehaviour
     {
-        [Tooltip("Pontes por onde os inimigos saem. Com mais de uma (Difícil), eles se alternam entre elas.")]
+        [Tooltip("Pontes por onde os inimigos saem, na ordem. A dificuldade diz quantas delas usar (Bridge Count); com mais de uma, os inimigos se alternam.")]
         [SerializeField] private LightBridge[] bridges;
+
+        [Tooltip("Objetos que só existem com a segunda ponte (o portal dela): ficam desligados quando a dificuldade usa uma ponte só.")]
+        [SerializeField] private GameObject[] secondBridgeObjects;
 
         [Tooltip("Quem dá créditos e pontos quando um inimigo morre.")]
         [SerializeField] private GameSession session;
@@ -21,6 +24,7 @@ namespace NebulaGuard
         private DifficultyData difficulty;
         private int aliveInWave;
         private int nextBridge;
+        private int activeBridges = 1;
 
         /// <summary>Começou a contagem antes de uma onda: (número da onda, a partir de 1; segundos).</summary>
         public event Action<int, float> WaveCountdownStarted;
@@ -51,7 +55,26 @@ namespace NebulaGuard
             }
 
             difficulty = chosen;
+            UseBridges(chosen.BridgeCount);
             StartCoroutine(RunWaves());
+        }
+
+        // Liga só as pontes que a dificuldade usa: as outras e o portal delas somem da cena.
+        private void UseBridges(int wanted)
+        {
+            activeBridges = Mathf.Clamp(wanted, 1, bridges.Length);
+
+            for (int i = 0; i < bridges.Length; i++)
+                bridges[i].gameObject.SetActive(i < activeBridges);
+
+            if (secondBridgeObjects == null)
+                return;
+
+            foreach (GameObject extra in secondBridgeObjects)
+            {
+                if (extra != null)
+                    extra.SetActive(activeBridges >= 2);
+            }
         }
 
         /// <summary>Para de soltar inimigos (fim de partida).</summary>
@@ -105,7 +128,7 @@ namespace NebulaGuard
         private void Spawn(Enemy prefab)
         {
             LightBridge bridge = bridges[nextBridge];
-            nextBridge = (nextBridge + 1) % bridges.Length;
+            nextBridge = (nextBridge + 1) % activeBridges;
 
             Enemy enemy = Instantiate(prefab, bridge.GetWaypoint(0), Quaternion.identity);
             enemy.Initialize(bridge, difficulty.HealthMultiplier, difficulty.SpeedMultiplier);
