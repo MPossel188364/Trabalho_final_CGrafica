@@ -891,3 +891,35 @@ do slot volta; clicar no slot vazio abre de novo o menu de compra; Esc fecha o m
 **Como testar:** Play: barra do topo com ícones e números; perder vida deixa a barra amarela
 e depois vermelha; Esc mostra o botão azul "Continuar"; no fim aparece o título, o motivo,
 os pontos e o botão verde, com fade.
+
+## 2026-11-17 — Visual, parte 5: menu de compra e venda no estilo novo
+
+**O que foi feito:** `BuildMenuUI.cs` reescrito com TextMeshPro e as imagens da Kenney.
+- Cabeçalho: "Construir" (ou o nome da nave, na venda) e o saldo com a moeda.
+- Um botão por nave: **desenho da nave** (lido do `SpriteRenderer` do próprio prefab), nome e
+  custo ao lado da moeda. Nave que não dá para pagar: botão apagado (45% de opacidade), sem
+  clique e com o custo em vermelho; acende sozinho se os créditos chegarem com o menu aberto.
+- Venda: botão vermelho com a nave, "Vender" e "+valor".
+- Campos novos no componente (fonte, botão de compra, botão de venda, moeda), preenchidos
+  pela ferramenta **NebulaGuard → Aplicar estilo ao HUD**.
+- `BuildController`: `ShowSell` passou a receber a nave (para mostrar o desenho dela).
+
+**Por quê assim:**
+- **Continua montado por código:** o número de botões depende da lista `Tower Prefabs`;
+  nave nova aparece no menu sem mexer na cena.
+- **`HorizontalLayoutGroup` em cada botão** enfileira ícone, nome, moeda e valor; o nome tem
+  `flexibleWidth = 1`, ocupa o que sobra e empurra o valor para a borda direita.
+- **`CanvasGroup` para apagar o botão:** muda a opacidade do botão e de tudo dentro dele de
+  uma vez. O tom cinza que o `Button` aplica quando desligado foi neutralizado
+  (`disabledColor` branco), senão a imagem escureceria duas vezes.
+- **Ícones e textos com `raycastTarget = false`:** o clique atravessa para o botão.
+- **Funciona sem as imagens:** se os campos estiverem vazios, volta às cores lisas e à fonte
+  padrão do TMP, em vez de dar erro.
+
+**Problema no caminho:** os botões da Kenney são **brancos com borda colorida**, e o texto
+branco sumia. Texto dentro dos botões passou a ser escuro (nome em `1A2238`, custo em dourado
+escuro); a ferramenta aplicou o mesmo aos botões "Continuar" e "Jogar de novo" do HUD.
+
+**Como testar:** Play; clicar num slot vazio mostra as 3 naves com desenho e custo; com 100
+créditos o Cruzador (120) aparece apagado e com custo vermelho; comprar um Caça e clicar
+nele mostra o botão vermelho "Vender +50".

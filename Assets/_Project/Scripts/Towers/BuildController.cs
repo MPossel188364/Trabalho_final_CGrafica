@@ -90,8 +90,8 @@ namespace NebulaGuard
         private void OpenSellMenu(BuildSlot slot)
         {
             selected = slot;
-            TowerData data = slot.Occupant.Data;
-            menu.ShowSell(slot.transform.position, data.DisplayName, RefundFor(data), session.Credits);
+            TowerShip tower = slot.Occupant;
+            menu.ShowSell(slot.transform.position, tower, RefundFor(tower.Data), session.Credits);
         }
 
         private int RefundFor(TowerData data) => Mathf.RoundToInt(data.Cost * sellRefund);

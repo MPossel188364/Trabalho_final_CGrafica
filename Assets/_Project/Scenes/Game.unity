@@ -1718,6 +1718,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fc6f2d668a74e83aec2fc788b12c217, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.BuildMenuUI
+  font: {fileID: 11400000, guid: 6ea9415bf5dae4dfeb31410ed5e97e00, type: 2}
+  buyButtonSprite: {fileID: 21300000, guid: 282e8101b37e34f6fa119e21cb286baf, type: 3}
+  sellButtonSprite: {fileID: 21300000, guid: f945ccef789b84cf9a5daa0d6bcc0466, type: 3}
+  coinIcon: {fileID: 21300000, guid: ae864ac5f3019468d97c932775150b25, type: 3}
 --- !u!4 &678412926
 Transform:
   m_ObjectHideFlags: 0
@@ -2603,8 +2607,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4281868826
+  m_fontColor: {r: 0.101960786, g: 0.13333334, b: 0.21960784, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3446,8 +3450,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4281868826
+  m_fontColor: {r: 0.101960786, g: 0.13333334, b: 0.21960784, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

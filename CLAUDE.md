@@ -109,8 +109,12 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 - **Vender** = clique num slot ocupado → `BuildMenuUI.ShowSell` → `BuildSlot.TryClear` →
   `GameSession.AddCredits`. A fração devolvida é o `Sell Refund` do `DifficultyData` (1 no
   Fácil), repassada pelo `GameManager` em `buildController.Begin`.
-- **`BuildMenuUI` monta o próprio Canvas e botões por código** (uGUI + `Text` legado,
-  fonte `LegacyRuntime.ttf`) e cria um `EventSystem` se a cena não tiver nenhum. O
+- **`BuildMenuUI` monta o próprio Canvas e botões por código** (uGUI + TextMeshPro, com
+  `HorizontalLayoutGroup` em cada botão) e cria um `EventSystem` se a cena não tiver nenhum.
+  A fonte e as imagens ficam em campos do componente, preenchidos pela ferramenta
+  **Aplicar estilo ao HUD**; sem elas, o menu volta às cores lisas.
+- **Botões da Kenney são brancos com borda colorida:** texto dentro deles é **escuro**
+  (`1A2238`); texto branco só sobre fundo escuro. O
   projeto usa só o **novo Input System**: ler mouse/teclado com `Mouse.current` e
   `Keyboard.current`, nunca `Input.GetKey`/`Input.mousePosition`.
 - Scripts de ferramenta do editor ficam em `Scripts/Editor/`, no namespace
@@ -259,7 +263,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Estilo do HUD: fonte Kenvector Future, barra do topo transparente com ícones (vida,
   onda, moeda, estrela), barra de vida que muda de cor, cronômetro em alerta nos últimos 30 s,
   botões da Kenney e tela de fim com motivo e fade (`Editor/HudStyleSetup.cs`)
-- [ ] Menu de compra e venda no mesmo estilo (TMP, botões da Kenney, ícone da nave)
+- [x] Menu de compra e venda no mesmo estilo (TMP, botões da Kenney, desenho da nave, nave cara apagada)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão

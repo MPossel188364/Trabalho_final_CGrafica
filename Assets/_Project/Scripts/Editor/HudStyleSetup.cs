@@ -19,6 +19,7 @@ namespace NebulaGuard.EditorTools
     {
         private const string ScenePath = "Assets/_Project/Scenes/Game.unity";
         private const string UiArt = "Assets/_Project/Art/UI/";
+        private const string FontPath = "Assets/_Project/Art/Fonts/kenvector_future SDF.asset";
 
         // Pixels de borda que não esticam nos botões da Kenney (cantos arredondados).
         private const float ButtonBorder = 12f;
@@ -31,6 +32,7 @@ namespace NebulaGuard.EditorTools
         private static readonly Color HealthBackColor = Hex("1A2238");
         private static readonly Color Gold = Hex("FFD34A");
         private static readonly Color ReasonColor = Hex("B8C2D9");
+        private static readonly Color ButtonTextColor = Hex("1A2238");
 
         private static readonly Vector2 MiddleLeft = new Vector2(0f, 0.5f);
         private static readonly Vector2 MiddleCenter = new Vector2(0.5f, 0.5f);
@@ -41,7 +43,8 @@ namespace NebulaGuard.EditorTools
         {
             if (!EditorUtility.DisplayDialog("Aplicar estilo ao HUD",
                     "Vai abrir a cena Game e ajustar o HUD_Canvas: ícones e posições da barra do topo, " +
-                    "cores, botões da Kenney e o texto do motivo do fim. A cena é salva no final " +
+                    "cores, botões da Kenney e o texto do motivo do fim; e preencher a fonte e as " +
+                    "imagens do menu de construção. A cena é salva no final " +
                     "(Cmd + Z desfaz). Continuar?", "Continuar", "Cancelar"))
                 return;
 
@@ -63,6 +66,7 @@ namespace NebulaGuard.EditorTools
             StyleCountdown(root);
             StyleButton(root, "PausePanel/ResumeButton", "ButtonBlue");
             StyleEndPanel(root, canvas.GetComponent<HUD>());
+            StyleBuildMenu();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -211,6 +215,14 @@ namespace NebulaGuard.EditorTools
             var rect = (RectTransform)button;
             Undo.RecordObject(rect, "Botão");
             rect.sizeDelta = new Vector2(360f, 80f);
+
+            // Os botões da Kenney são brancos com borda colorida: texto escuro para aparecer.
+            var label = button.GetComponentInChildren<TMP_Text>();
+            if (label != null)
+            {
+                Undo.RecordObject(label, "Texto do botão");
+                label.color = ButtonTextColor;
+            }
         }
 
         private static void StyleEndPanel(Transform root, HUD hud)
@@ -261,6 +273,29 @@ namespace NebulaGuard.EditorTools
                 serialized.FindProperty("endReasonText").objectReferenceValue = reasonText;
                 serialized.ApplyModifiedProperties();
             }
+        }
+
+        // ---------- Menu de construção ----------
+
+        /// <summary>
+        /// O menu de compra e venda é montado por código ao dar Play; aqui só preenchemos a
+        /// fonte e as imagens que ele usa (campos do componente BuildMenuUI).
+        /// </summary>
+        private static void StyleBuildMenu()
+        {
+            var menu = Object.FindFirstObjectByType<BuildMenuUI>();
+            if (menu == null)
+            {
+                Debug.LogWarning("Não achei o BuildMenuUI na cena; pulei o menu de construção.");
+                return;
+            }
+
+            var serialized = new SerializedObject(menu);
+            serialized.FindProperty("font").objectReferenceValue = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
+            serialized.FindProperty("buyButtonSprite").objectReferenceValue = LoadSprite("ButtonBlue");
+            serialized.FindProperty("sellButtonSprite").objectReferenceValue = LoadSprite("ButtonRed");
+            serialized.FindProperty("coinIcon").objectReferenceValue = LoadSprite("IconCredits");
+            serialized.ApplyModifiedProperties();
         }
 
         // ---------- Utilitários ----------
