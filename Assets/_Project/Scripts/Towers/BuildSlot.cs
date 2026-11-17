@@ -39,6 +39,20 @@ namespace NebulaGuard
             return true;
         }
 
+        /// <summary>
+        /// Remove a nave do slot (venda). Devolve false se o slot já estava livre. Quem
+        /// devolve os créditos é o BuildController.
+        /// </summary>
+        public bool TryClear()
+        {
+            if (IsFree)
+                return false;
+
+            Destroy(occupant.gameObject);
+            occupant = null;
+            return true;
+        }
+
         // Chamado ao adicionar o componente: já liga o marcador do próprio objeto.
         private void Reset()
         {

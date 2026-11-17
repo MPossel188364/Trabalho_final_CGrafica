@@ -779,3 +779,147 @@ centro.
 **Como testar:** Play na cena Game. O céu desliza devagar para a esquerda, a camada da
 frente mais rápido que as de trás; Esc pausa e o fundo para. As estrelas só existem no
 Play (são criadas no `Start`).
+
+## 2026-11-17 — Visual, parte 3: sprites da Kenney
+
+**O que foi feito:** as formas provisórias viraram sprites do pacote **Space Shooter
+(Remastered)** da Kenney (licença CC0, domínio público). Só as 11 imagens usadas foram
+copiadas para `Assets/_Project/Art/`, com nomes do jogo; `Art/CREDITOS.txt` registra a origem
+de cada uma.
+
+| Objeto | Imagem | Escala |
+| --- | --- | --- |
+| Caça / Bombardeiro / Cruzador | `playerShip1/2/3_blue` | 0,8 / 1 / 1,1 |
+| Drone / Caça alienígena / Couraçado | `enemyRed1/2/4` | 0,6 / 0,8 / 1,1 |
+| Laser do Caça / Raio do Cruzador | `laserBlue01` / `laserBlue16` | 1 |
+| Míssil do Bombardeiro | `laserRed16` | 1 |
+| Nave-mãe / Portal (cena) | `ufoBlue` / `ufoRed` | 3 / 1,8 |
+
+**Por quê assim:**
+- **Lados por cor:** naves do jogador azuis, inimigos laranja-avermelhados. Dá para saber
+  quem é quem sem ler nada.
+- **Formato pela função:** o Caça é a nave pequena, o Bombardeiro a mais larga, o Cruzador a
+  mais comprida; entre os inimigos, o Drone é o menor e o Couraçado o mais robusto.
+- **Só as imagens usadas** vão para o repositório (não as 295 do pacote), com nomes nossos:
+  `Art/Towers/Caca.png` diz mais que `playerShip1_blue.png`.
+- **Cor branca no Sprite Renderer:** a cor multiplica a imagem; as cores dos provisórios
+  escureceriam os sprites.
+- **Escala igual em X e Y:** os provisórios eram esticados para imitar formatos.
+
+**Problemas no caminho:**
+- **Inimigos de ré:** as naves inimigas do pacote apontam para baixo. `Sprite Angle Offset`
+  do `Enemy` passou de -90 para **90**.
+- **Collider dos projéteis:** o raio é multiplicado pela escala do objeto; com a escala de
+  0,12 para 1, o raio caiu para 0,15 (senão o laser acertaria a um metro de distância).
+- **Tudo preto:** o `Global Light 2D` do template iluminava só a Sorting Layer `Default`.
+  Sprites com `Sprite-Lit-Default` nas layers `Ships` e `Enemies` não recebiam luz nenhuma, e
+  cor × luz zero = preto. As formas provisórias eram escuras e o problema passou despercebido.
+  Correção: **Target Sorting Layers = All**.
+
+**Como testar:** Play na cena Game: naves e inimigos coloridos, inimigos andando de frente
+pela ponte, tiros acertando só ao encostar, inimigos tirando vida da nave-mãe.
+
+## 2026-11-17 — Venda de naves
+
+**O que foi feito:** clicar numa nave já posicionada abre o menu com o botão
+**"Vender <nave> (+valor)"**; vendendo, a nave sai, o slot fica livre e os créditos voltam.
+- `BuildController`: clique em slot livre → menu de compra (como antes); em slot ocupado →
+  menu de venda. `OnSellChosen` lê o valor, chama `BuildSlot.TryClear` e devolve os créditos
+  com `GameSession.AddCredits`.
+- `BuildSlot.TryClear()`: destrói a nave e libera o slot (o marcador volta a aparecer).
+- `BuildMenuUI.ShowSell(...)` e o evento `SellChosen`: um botão vermelho de venda. A criação
+  de botão virou um método só (`AddButton(texto, custo, cor, ação)`), usado pela compra e
+  pela venda.
+- `DifficultyData.sellRefund` (**Sell Refund**, de 0 a 1; 1 = devolve tudo). O `GameManager`
+  repassa para o `BuildController` com `Begin`, como já fazia com créditos e vida.
+- Prefab `BuildSlot`: raio do collider de 0,1 para 0,35 (0,7 no mundo, com a escala 2), para
+  o clique em qualquer parte da nave acertar o slot.
+
+**Por quê assim:**
+- **Devolução de 100%** (decisão do grupo): o jogador pode reorganizar as naves quando
+  quiser. Fica num ScriptableObject, não fixo no código, porque é número de balanceamento: o
+  Difícil pode devolver menos mudando só o asset. O `Facil.asset` não precisou mudar: campo
+  novo que não existe no asset assume o valor padrão do script (1).
+- **O valor é lido antes de destruir a nave:** depois do `TryClear` o objeto não existe mais.
+- **Mesma divisão de papéis da compra:** o menu só mostra e avisa, o slot só guarda a nave,
+  o `GameSession` é o único que mexe nos créditos, e o `BuildController` liga os três.
+- **O clique é no slot, não na nave:** as naves não têm collider (nem precisam: os inimigos
+  são achados pelo `OverlapCircle` da nave). Aumentar o collider do slot resolve o clique sem
+  mexer nos prefabs das naves.
+
+**Como testar:** comprar um Caça (−50), clicar nele e vender (+50): a nave some e o círculo
+do slot volta; clicar no slot vazio abre de novo o menu de compra; Esc fecha o menu de venda.
+
+## 2026-11-17 — Visual, parte 4: estilo do HUD
+
+**O que foi feito:**
+- **Fonte Kenvector Future** (do pacote da Kenney, com todos os acentos do português) em
+  todos os textos do HUD, como *Font Asset* do TextMeshPro (`Art/Fonts/kenvector_future SDF`).
+- **Barra do topo transparente**, com um ícone ao lado de cada número: cápsula verde (vida),
+  nave inimiga (onda), **moeda com "$"** (créditos) e estrela (pontos). Os textos mostram só o
+  número; o ícone diz o que é.
+- `HUD.cs`:
+  - a barra de vida muda de cor (verde → amarelo → vermelho) por um `Gradient`;
+  - nos últimos 30 s o cronômetro pulsa em vermelho;
+  - a tela de fim mostra o motivo (`GameManager.EndReason`, ex.: "A nave-mãe foi destruída")
+    e aparece com fade e um leve zoom.
+- Botões "Continuar" (azul) e "Jogar de novo" (verde) com as imagens da Kenney.
+- `Editor/HudStyleSetup.cs`: menu **NebulaGuard → Aplicar estilo ao HUD**, que aplica tudo
+  isso na cena de uma vez e salva.
+- `tools/gerar_icone_moeda.py`: o pacote não tem moeda; o script desenha o ícone pixel a pixel.
+
+**Por quê assim:**
+- **Ferramenta de editor em vez de cliques:** eram ~40 ajustes de posição, cor e sprite; à mão
+  é fácil errar ou esquecer de salvar (aconteceu). A ferramenta acha cada objeto pelo nome,
+  só cria o que falta (rodar de novo não duplica), entra no Undo e salva a cena. Mudar o layout
+  depois = mudar um número nela e rodar de novo.
+- **9-slice nos botões:** a imagem tem 222 × 39 px e o botão 360 × 80. Com borda de 12 px, os
+  cantos ficam do tamanho original e só o miolo estica, então o arredondado não deforma.
+- **Fade com `Time.unscaledDeltaTime`:** no fim da partida o `timeScale` é 0, e o
+  `Time.deltaTime` também; a animação usaria o tempo do jogo e ficaria parada.
+- **Curva de saída no fade** (`1 - (1 - t)²`): começa rápido e desacelera, que é como uma
+  janela entrando parece natural.
+- **Cor da vida e alerta do tempo:** o jogador percebe o perigo sem ler o número.
+
+**Problemas no caminho:**
+- A cena não estava salva quando fui conferir: só a fonte tinha entrado.
+- "Fundinho branco" atrás do ícone de vida: era um objeto `Image` sem sprite que sobrou de
+  um teste (Image sem sprite é desenhada como um quadrado branco). Apagado.
+- O primeiro ícone de vida (escudo prateado) era claro e parecia um quadrado; trocado pela
+  cápsula verde.
+
+**Como testar:** Play: barra do topo com ícones e números; perder vida deixa a barra amarela
+e depois vermelha; Esc mostra o botão azul "Continuar"; no fim aparece o título, o motivo,
+os pontos e o botão verde, com fade.
+
+## 2026-11-17 — Visual, parte 5: menu de compra e venda no estilo novo
+
+**O que foi feito:** `BuildMenuUI.cs` reescrito com TextMeshPro e as imagens da Kenney.
+- Cabeçalho: "Construir" (ou o nome da nave, na venda) e o saldo com a moeda.
+- Um botão por nave: **desenho da nave** (lido do `SpriteRenderer` do próprio prefab), nome e
+  custo ao lado da moeda. Nave que não dá para pagar: botão apagado (45% de opacidade), sem
+  clique e com o custo em vermelho; acende sozinho se os créditos chegarem com o menu aberto.
+- Venda: botão vermelho com a nave, "Vender" e "+valor".
+- Campos novos no componente (fonte, botão de compra, botão de venda, moeda), preenchidos
+  pela ferramenta **NebulaGuard → Aplicar estilo ao HUD**.
+- `BuildController`: `ShowSell` passou a receber a nave (para mostrar o desenho dela).
+
+**Por quê assim:**
+- **Continua montado por código:** o número de botões depende da lista `Tower Prefabs`;
+  nave nova aparece no menu sem mexer na cena.
+- **`HorizontalLayoutGroup` em cada botão** enfileira ícone, nome, moeda e valor; o nome tem
+  `flexibleWidth = 1`, ocupa o que sobra e empurra o valor para a borda direita.
+- **`CanvasGroup` para apagar o botão:** muda a opacidade do botão e de tudo dentro dele de
+  uma vez. O tom cinza que o `Button` aplica quando desligado foi neutralizado
+  (`disabledColor` branco), senão a imagem escureceria duas vezes.
+- **Ícones e textos com `raycastTarget = false`:** o clique atravessa para o botão.
+- **Funciona sem as imagens:** se os campos estiverem vazios, volta às cores lisas e à fonte
+  padrão do TMP, em vez de dar erro.
+
+**Problema no caminho:** os botões da Kenney são **brancos com borda colorida**, e o texto
+branco sumia. Texto dentro dos botões passou a ser escuro (nome em `1A2238`, custo em dourado
+escuro); a ferramenta aplicou o mesmo aos botões "Continuar" e "Jogar de novo" do HUD.
+
+**Como testar:** Play; clicar num slot vazio mostra as 3 naves com desenho e custo; com 100
+créditos o Cruzador (120) aparece apagado e com custo vermelho; comprar um Caça e clicar
+nele mostra o botão vermelho "Vender +50".

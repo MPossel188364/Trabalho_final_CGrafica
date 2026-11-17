@@ -47,6 +47,9 @@ namespace NebulaGuard
         [Tooltip("Segundos de preparação antes de cada onda (inclusive a primeira).")]
         [Min(0f)] [SerializeField] private float timeBetweenWaves = 10f;
 
+        [Tooltip("Fração do custo devolvida ao vender uma nave (1 = devolve tudo).")]
+        [Range(0f, 1f)] [SerializeField] private float sellRefund = 1f;
+
         [Tooltip("Multiplica a vida de todos os inimigos.")]
         [Min(0.1f)] [SerializeField] private float healthMultiplier = 1f;
 
@@ -61,6 +64,7 @@ namespace NebulaGuard
         public float TimeLimit => timeLimit;
         public float SpawnInterval => spawnInterval;
         public float TimeBetweenWaves => timeBetweenWaves;
+        public float SellRefund => sellRefund;
         public float HealthMultiplier => healthMultiplier;
         public float SpeedMultiplier => speedMultiplier;
         public IReadOnlyList<Wave> Waves => waves;

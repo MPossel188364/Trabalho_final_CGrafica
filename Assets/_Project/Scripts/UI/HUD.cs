@@ -22,11 +22,18 @@ namespace NebulaGuard
         [Header("Barra do topo")]
         [Tooltip("Image com Image Type = Filled, Fill Method = Horizontal.")]
         [SerializeField] private Image healthFill;
+
+        [Tooltip("Cor da barra conforme a vida: esquerda = vazia, direita = cheia.")]
+        [SerializeField] private Gradient healthColors = DefaultHealthColors();
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private TMP_Text waveText;
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text creditsText;
         [SerializeField] private TMP_Text scoreText;
+
+        [Tooltip("Abaixo destes segundos, o cronômetro fica na cor de alerta e pulsa.")]
+        [SerializeField] private float timerWarningSeconds = 30f;
+        [SerializeField] private Color timerWarningColor = new Color(1f, 0.35f, 0.3f);
 
         [Header("Contagem antes da onda")]
         [SerializeField] private TMP_Text countdownText;
@@ -39,7 +46,13 @@ namespace NebulaGuard
         [SerializeField] private GameObject endPanel;
         [SerializeField] private TMP_Text endTitleText;
         [SerializeField] private TMP_Text endScoreText;
+
+        [Tooltip("Opcional: frase com o motivo do fim (\"A nave-mãe foi destruída\").")]
+        [SerializeField] private TMP_Text endReasonText;
         [SerializeField] private Button restartButton;
+
+        [Tooltip("Segundos do fade da tela de fim.")]
+        [SerializeField] private float endFadeDuration = 0.6f;
 
         [Header("Cores")]
         [SerializeField] private Color victoryColor = new Color(0.35f, 1f, 0.55f);
@@ -47,6 +60,9 @@ namespace NebulaGuard
 
         private float countdownRemaining;
         private int countdownWave;
+        private Color timerNormalColor;
+        private CanvasGroup endGroup;
+        private float endFadeTime = -1f;
 
         private void Awake()
         {
@@ -60,6 +76,12 @@ namespace NebulaGuard
             pausePanel.SetActive(false);
             endPanel.SetActive(false);
             countdownText.gameObject.SetActive(false);
+
+            timerNormalColor = timerText.color;
+
+            // CanvasGroup controla a transparência do painel inteiro (fundo, textos e botão).
+            if (!endPanel.TryGetComponent(out endGroup))
+                endGroup = endPanel.AddComponent<CanvasGroup>();
         }
 
         // OnEnable de todos os objetos roda antes de qualquer Start: assim o HUD já está
@@ -87,7 +109,13 @@ namespace NebulaGuard
         private void Update()
         {
             // O cronômetro muda todo frame, então é lido direto em vez de ter um evento.
-            timerText.text = FormatTime(gameManager.TimeRemaining);
+            float time = gameManager.TimeRemaining;
+            timerText.text = FormatTime(time);
+
+            // Pouco tempo: cor de alerta pulsando uma vez por segundo (só durante a partida).
+            bool warning = gameManager.State == GameState.Playing && time <= timerWarningSeconds;
+            float pulse = 0.5f + 0.5f * Mathf.Cos(time * Mathf.PI * 2f);
+            timerText.color = warning ? Color.Lerp(timerNormalColor, timerWarningColor, 0.4f + 0.6f * pulse) : timerNormalColor;
 
             if (countdownRemaining > 0f)
             {
@@ -96,6 +124,24 @@ namespace NebulaGuard
                 int seconds = Mathf.Max(1, Mathf.CeilToInt(countdownRemaining));
                 countdownText.text = $"Onda {countdownWave} em {seconds}";
             }
+
+            UpdateEndFade();
+        }
+
+        // O fim de partida para o tempo (timeScale = 0), então o fade usa o tempo real.
+        private void UpdateEndFade()
+        {
+            if (endFadeTime < 0f)
+                return;
+
+            endFadeTime += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(endFadeTime / Mathf.Max(0.01f, endFadeDuration));
+            float eased = 1f - (1f - t) * (1f - t); // começa rápido e desacelera no fim
+            endGroup.alpha = eased;
+            endPanel.transform.localScale = Vector3.one * Mathf.Lerp(0.92f, 1f, eased);
+
+            if (t >= 1f)
+                endFadeTime = -1f;
         }
 
         private void OnWaveCountdownStarted(int wave, float seconds)
@@ -106,23 +152,26 @@ namespace NebulaGuard
 
             // Antes da primeira onda ainda não há onda atual para mostrar.
             if (wave == 1)
-                waveText.text = $"Onda 0/{waveSpawner.TotalWaves}";
+                waveText.text = $"0/{waveSpawner.TotalWaves}";
         }
 
         private void OnWaveStarted(int wave, int totalWaves)
         {
             countdownRemaining = 0f;
             countdownText.gameObject.SetActive(false);
-            waveText.text = $"Onda {wave}/{totalWaves}";
+            waveText.text = $"{wave}/{totalWaves}";
         }
 
-        private void OnCreditsChanged(int credits) => creditsText.text = $"Créditos: {credits}";
+        // Só o número: o ícone ao lado (raio = créditos, estrela = pontos) diz o que é.
+        private void OnCreditsChanged(int credits) => creditsText.text = credits.ToString();
 
-        private void OnScoreChanged(int score) => scoreText.text = $"Pontos: {score}";
+        private void OnScoreChanged(int score) => scoreText.text = score.ToString();
 
         private void OnHealthChanged(int current, int max)
         {
-            healthFill.fillAmount = max > 0 ? (float)current / max : 0f;
+            float fraction = max > 0 ? (float)current / max : 0f;
+            healthFill.fillAmount = fraction;
+            healthFill.color = healthColors.Evaluate(fraction);
             if (healthText != null)
                 healthText.text = $"{current}/{max}";
         }
@@ -139,6 +188,11 @@ namespace NebulaGuard
                 endTitleText.text = victory ? "VITÓRIA" : "DERROTA";
                 endTitleText.color = victory ? victoryColor : defeatColor;
                 endScoreText.text = $"Pontos: {session.Score}";
+                if (endReasonText != null)
+                    endReasonText.text = Capitalize(gameManager.EndReason);
+
+                endGroup.alpha = 0f;
+                endFadeTime = 0f;
             }
         }
 
@@ -146,6 +200,24 @@ namespace NebulaGuard
         private void Restart()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        private static string Capitalize(string text) =>
+            string.IsNullOrEmpty(text) ? text : char.ToUpper(text[0]) + text.Substring(1);
+
+        // Vermelho com pouca vida, amarelo na metade, verde cheia.
+        private static Gradient DefaultHealthColors()
+        {
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(0.95f, 0.25f, 0.25f), 0f),
+                    new GradientColorKey(new Color(1f, 0.8f, 0.2f), 0.5f),
+                    new GradientColorKey(new Color(0.3f, 0.9f, 0.4f), 1f),
+                },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+            return gradient;
         }
 
         private static string FormatTime(float seconds)

@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  m_Sprite: {fileID: 4112356383579328530, guid: 93ba0ca41800f40a486b6fc143086162, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -134,8 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.Enemy
   data: {fileID: 11400000, guid: ee2970c14c2d947b8ae3355a0036d992, type: 2}
-  testBridge: {fileID: 0}
-  spriteAngleOffset: -90
+  spriteAngleOffset: 90
 --- !u!58 &5603794497828213950
 CircleCollider2D:
   m_ObjectHideFlags: 0
