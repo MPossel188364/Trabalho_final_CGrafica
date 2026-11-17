@@ -849,3 +849,45 @@ pela ponte, tiros acertando só ao encostar, inimigos tirando vida da nave-mãe.
 
 **Como testar:** comprar um Caça (−50), clicar nele e vender (+50): a nave some e o círculo
 do slot volta; clicar no slot vazio abre de novo o menu de compra; Esc fecha o menu de venda.
+
+## 2026-11-17 — Visual, parte 4: estilo do HUD
+
+**O que foi feito:**
+- **Fonte Kenvector Future** (do pacote da Kenney, com todos os acentos do português) em
+  todos os textos do HUD, como *Font Asset* do TextMeshPro (`Art/Fonts/kenvector_future SDF`).
+- **Barra do topo transparente**, com um ícone ao lado de cada número: cápsula verde (vida),
+  nave inimiga (onda), **moeda com "$"** (créditos) e estrela (pontos). Os textos mostram só o
+  número; o ícone diz o que é.
+- `HUD.cs`:
+  - a barra de vida muda de cor (verde → amarelo → vermelho) por um `Gradient`;
+  - nos últimos 30 s o cronômetro pulsa em vermelho;
+  - a tela de fim mostra o motivo (`GameManager.EndReason`, ex.: "A nave-mãe foi destruída")
+    e aparece com fade e um leve zoom.
+- Botões "Continuar" (azul) e "Jogar de novo" (verde) com as imagens da Kenney.
+- `Editor/HudStyleSetup.cs`: menu **NebulaGuard → Aplicar estilo ao HUD**, que aplica tudo
+  isso na cena de uma vez e salva.
+- `tools/gerar_icone_moeda.py`: o pacote não tem moeda; o script desenha o ícone pixel a pixel.
+
+**Por quê assim:**
+- **Ferramenta de editor em vez de cliques:** eram ~40 ajustes de posição, cor e sprite; à mão
+  é fácil errar ou esquecer de salvar (aconteceu). A ferramenta acha cada objeto pelo nome,
+  só cria o que falta (rodar de novo não duplica), entra no Undo e salva a cena. Mudar o layout
+  depois = mudar um número nela e rodar de novo.
+- **9-slice nos botões:** a imagem tem 222 × 39 px e o botão 360 × 80. Com borda de 12 px, os
+  cantos ficam do tamanho original e só o miolo estica, então o arredondado não deforma.
+- **Fade com `Time.unscaledDeltaTime`:** no fim da partida o `timeScale` é 0, e o
+  `Time.deltaTime` também; a animação usaria o tempo do jogo e ficaria parada.
+- **Curva de saída no fade** (`1 - (1 - t)²`): começa rápido e desacelera, que é como uma
+  janela entrando parece natural.
+- **Cor da vida e alerta do tempo:** o jogador percebe o perigo sem ler o número.
+
+**Problemas no caminho:**
+- A cena não estava salva quando fui conferir: só a fonte tinha entrado.
+- "Fundinho branco" atrás do ícone de vida: era um objeto `Image` sem sprite que sobrou de
+  um teste (Image sem sprite é desenhada como um quadrado branco). Apagado.
+- O primeiro ícone de vida (escudo prateado) era claro e parecia um quadrado; trocado pela
+  cápsula verde.
+
+**Como testar:** Play: barra do topo com ícones e números; perder vida deixa a barra amarela
+e depois vermelha; Esc mostra o botão azul "Continuar"; no fim aparece o título, o motivo,
+os pontos e o botão verde, com fade.

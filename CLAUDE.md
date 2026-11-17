@@ -49,14 +49,17 @@ Assets/_Project/
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
-    Editor/    BuildSlotSetup (só existe no editor, não entra no build)
+    Editor/    BuildSlotSetup, HudStyleSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
   Prefabs/     naves, inimigos, projéteis, efeitos
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
-  Art/         sprites
+  Art/         sprites (Towers, Enemies, Projectiles, Base), UI (botões e ícones), Fonts
   Audio/       música e efeitos
   Materials/   pontes de luz, partículas
 ```
+
+Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não importa
+(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`).
 
 ## Padrões de código
 
@@ -125,6 +128,13 @@ Assets/_Project/
   1920×1080) e só escuta eventos; dado que muda todo frame (cronômetro) é lido no `Update`.
   Ao trocar a âncora de um elemento, segurar **Alt + Shift** ou redigitar posição e tamanho
   (o Unity mantém a posição antiga). Texto TMP grande: **Wrapping = Disabled**.
+  O estilo (posições, cores, ícones, botões) é aplicado por **NebulaGuard → Aplicar estilo ao
+  HUD** (`Editor/HudStyleSetup.cs`): mudar o layout = mudar os números na ferramenta e rodar de
+  novo. Ela acha os objetos pelo nome e só cria o que falta. Fonte: `kenvector_future SDF`.
+  Botões da Kenney: sprite com borda 12 (9-slice) e **Image Type = Sliced**. Animação com o
+  jogo parado (`timeScale = 0`) usa `Time.unscaledDeltaTime`.
+- **Image sem sprite aparece como um quadrado branco**: objeto de UI que sobrou de um teste
+  aparece como "fundo branco".
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
@@ -246,6 +256,10 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Fundo com estrelas: `Effects/ParallaxLayer.cs`, 3 camadas no objeto `Background`
 - [x] Sprites da Kenney nas naves, inimigos, projéteis, nave-mãe e portal (`Art/`)
 - [x] Venda de naves: clique na nave → "Vender" devolve 100% do custo (`Sell Refund`)
+- [x] Estilo do HUD: fonte Kenvector Future, barra do topo transparente com ícones (vida,
+  onda, moeda, estrela), barra de vida que muda de cor, cronômetro em alerta nos últimos 30 s,
+  botões da Kenney e tela de fim com motivo e fade (`Editor/HudStyleSetup.cs`)
+- [ ] Menu de compra e venda no mesmo estilo (TMP, botões da Kenney, ícone da nave)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão

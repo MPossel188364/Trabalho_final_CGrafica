@@ -13,3 +13,9 @@ Projectiles/Missil_Bombardeiro.png <- PNG/Lasers/laserRed16.png
 Projectiles/Raio_Cruzador.png <- PNG/Lasers/laserBlue16.png
 Base/Mothership.png      <- PNG/ufoBlue.png
 Base/Portal.png          <- PNG/ufoRed.png
+UI/ButtonBlue|Green|Red|Yellow.png <- PNG/UI/buttonBlue|Green|Red|Yellow.png
+UI/IconHealth.png        <- PNG/Power-ups/pill_green.png
+UI/IconCredits.png       <- desenhado por nós (tools/gerar_icone_moeda.py), não é da Kenney
+UI/IconScore.png         <- PNG/Power-ups/star_gold.png
+UI/IconWave.png          <- PNG/UI/playerLife1_red.png
+Fonts/kenvector_future.ttf, kenvector_future_thin.ttf <- Bonus/ (mesma licença CC0)

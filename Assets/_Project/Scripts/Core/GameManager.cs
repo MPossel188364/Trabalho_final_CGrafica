@@ -35,6 +35,9 @@ namespace NebulaGuard
         public GameState State { get; private set; } = GameState.Preparing;
         public DifficultyData Difficulty => difficulty;
 
+        /// <summary>Por que a partida acabou (ex.: "a nave-mãe foi destruída"). Vazio enquanto ela dura.</summary>
+        public string EndReason { get; private set; } = "";
+
         /// <summary>Segundos que faltam no cronômetro. Começa a contar na primeira onda.</summary>
         public float TimeRemaining { get; private set; }
 
@@ -158,6 +161,7 @@ namespace NebulaGuard
             SetBuildingAllowed(false);
             Time.timeScale = 0f; // congela inimigos, naves e projéteis
 
+            EndReason = reason;
             Debug.Log($"Fim de partida: {(victory ? "VITÓRIA" : "DERROTA")} ({reason}). Pontos: {session.Score}.");
             SetState(victory ? GameState.Victory : GameState.Defeat);
         }
