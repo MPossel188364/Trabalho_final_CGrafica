@@ -746,3 +746,36 @@ centro.
 
 **Como testar:** Play na cena Game: a ponte, os lasers e o portal ganham halo; desligar o
 `Global Volume` (checkbox no Inspector) mostra a diferença.
+
+## 2026-11-17 — Visual, parte 2: fundo de estrelas com parallax
+
+**O que foi feito:**
+- `Scripts/Effects/ParallaxLayer.cs`: uma camada de estrelas. No `Start` cria as estrelas
+  como objetos filhos (posição, tamanho e brilho sorteados); no `Update` move todas para a
+  esquerda e devolve para a direita a que sai da área.
+- Na cena Game, objeto `Background` com três camadas:
+
+| Camada | Estrelas | Tamanho | Brilho | Velocidade | Sorting Order |
+| --- | --- | --- | --- | --- | --- |
+| `Stars_Far` (tom azulado `AFC8FF`) | 150 | 0,05 – 0,10 | 0,2 – 0,45 | 0,15 | 0 |
+| `Stars_Mid` | 80 | 0,08 – 0,15 | 0,4 – 0,7 | 0,4 | 1 |
+| `Stars_Near` | 30 | 0,12 – 0,22 | 0,7 – 1 | 0,9 | 2 |
+
+**Por quê assim:**
+- **Parallax:** objetos distantes parecem se mover mais devagar que os próximos. Camadas
+  com velocidade, tamanho e brilho crescentes fazem o olho ler profundidade num jogo 2D.
+- **Repetição sem emenda:** as estrelas cobrem uma área de 34 × 20 (a tela tem 32 × 18).
+  A que passa da borda esquerda ganha `+ largura` no x e reaparece à direita, fora da vista;
+  o fundo é infinito com um número fixo de objetos, sem criar nem destruir nada.
+- **Sprite gerado por código** (`Texture2D` de 32 × 32 com alfa caindo do centro para a
+  borda): nenhuma imagem importada, e uma única textura (`static`) serve a todas as camadas.
+- **`System.Random` com semente:** o céu é igual em toda partida e o sorteio não mexe no
+  `UnityEngine.Random` usado pelo resto do jogo.
+- **Material `Sprite-Unlit-Default` e Sorting Layer `Background`:** a estrela brilha sozinha
+  (não depende das luzes 2D) e fica atrás de tudo. As da camada da frente passam do Threshold
+  do Bloom e ganham halo.
+- **`Time.deltaTime`:** o fundo para na pausa, junto com o resto.
+
+**Como testar:** Play na cena Game. O céu desliza devagar para a esquerda, a camada da
+frente mais rápido que as de trás; Esc pausa e o fundo para. As estrelas só existem no
+Play (são criadas no `Start`).

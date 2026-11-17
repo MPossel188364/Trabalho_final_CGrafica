@@ -174,6 +174,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | HUD_Canvas | — | — | — | — | Canvas Scaler 1920×1080 (match 0,5), componente `HUD`; filhos `TopBar`, `CountdownText`, `PausePanel`, `EndPanel` |
 | EventSystem | — | — | — | — | `InputSystemUIInputModule` |
 | Global Volume | — | — | — | — | perfil `Assets/Settings/GameVolumeProfile` (Bloom: Threshold 0,6, Intensity 1,5, Scatter 0,7; Vignette 0,3). A Main Camera tem **Post Processing** ligado |
+| Background | (0, 0) | 1 | Background | Sprite-Unlit-Default | fundo de estrelas: filhos `Stars_Far`, `Stars_Mid`, `Stars_Near` com `ParallaxLayer` (velocidades 0,15 / 0,4 / 0,9; Sorting Order 0 / 1 / 2); as estrelas são criadas no `Start` |
 
 O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
 
@@ -232,7 +233,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   e testados no Unity
 - [x] Ponte de luz arredondada (`LightBridge.cornerRadius`) e mais grossa (largura 0,85)
 - [x] Bloom e Vignette: `Global Volume` na cena Game
-- [ ] Fundo com estrelas (parallax)
+- [x] Fundo com estrelas: `Effects/ParallaxLayer.cs`, 3 camadas no objeto `Background`
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
