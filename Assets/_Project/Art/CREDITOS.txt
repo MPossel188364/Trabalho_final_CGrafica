@@ -1,0 +1,15 @@
+Sprites: "Space Shooter (Remastered)" de Kenney Vleugels (www.kenney.nl)
+Licença CC0 (domínio público): http://creativecommons.org/publicdomain/zero/1.0/
+
+Arquivo nosso            <- arquivo original do pacote
+Towers/Caca.png          <- PNG/playerShip1_blue.png
+Towers/Bombardeiro.png   <- PNG/playerShip2_blue.png
+Towers/Cruzador.png      <- PNG/playerShip3_blue.png
+Enemies/Drone.png        <- PNG/Enemies/enemyRed1.png
+Enemies/CacaAlienigena.png <- PNG/Enemies/enemyRed2.png
+Enemies/Couracado.png    <- PNG/Enemies/enemyRed4.png
+Projectiles/Laser_Caca.png <- PNG/Lasers/laserBlue01.png
+Projectiles/Missil_Bombardeiro.png <- PNG/Lasers/laserRed16.png
+Projectiles/Raio_Cruzador.png <- PNG/Lasers/laserBlue16.png
+Base/Mothership.png      <- PNG/ufoBlue.png
+Base/Portal.png          <- PNG/ufoRed.png

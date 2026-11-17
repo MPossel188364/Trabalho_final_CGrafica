@@ -80,6 +80,12 @@ Assets/_Project/
 - **Brilho = Bloom**: brilha o que for mais claro que o Threshold (0,6) do `GameVolumeProfile`.
   Para algo brilhar, cor clara e material `Sprite-Unlit-Default`; para não brilhar, cor mais
   escura. O HUD (Canvas Screen Space - Overlay) não passa pelo pós-processamento.
+- **Sprite novo:** importa como Sprite a 100 px por unidade (≈ 1 unidade por nave); no Sprite
+  Renderer, **Color branca** (a cor multiplica a imagem) e escala igual em X e Y. Os inimigos
+  da Kenney apontam para baixo: `Sprite Angle Offset = 90` no `Enemy` (as naves-torre, para
+  cima, usam -90). Collider de projétil: o raio é multiplicado pela escala.
+- **Luz 2D só ilumina as Sorting Layers marcadas** em *Target Sorting Layers*. Objeto com
+  `Sprite-Lit-Default` numa layer sem luz fica **preto**. O Global Light 2D está em **All**.
 - **Materiais sempre do URP**, nunca os embutidos do pipeline antigo
   (`Sprites-Default`, `Default-Line`): esses não respondem ao Bloom nem às luzes
   2D. Ficam em Packages → Universal RP → Runtime → Materials.
@@ -162,10 +168,10 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Objeto | Posição | Escala | Sorting Layer | Material | Observação |
 | --- | --- | --- | --- | --- | --- |
 | Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A`, Post Processing ligado |
-| Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1 |
+| Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1, **Target Sorting Layers = All** |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
-| Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
-| Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
+| Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Lit-Default | sprite `Art/Base/Portal` (Kenney) |
+| Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
@@ -179,8 +185,9 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
 
 Posições dos slots (dois por corredor, y = ±2): (-6, ±2), (0, ±2) e (6, ±2).
-Sprites provisórios são formas do Unity (2D Object → Sprites) até entrarem os da
-Kenney.
+Sprites: pacote **Space Shooter (Remastered)** da Kenney (CC0). Só as imagens usadas foram
+copiadas para `Art/` (com nomes do jogo); `Art/CREDITOS.txt` diz de qual arquivo do pacote veio
+cada uma. Os slots de construção ainda são círculos provisórios.
 
 Os corredores entre as colunas da ponte (x ≈ -6, 0 e 6) são onde ficarão os
 pontos de ancoragem das torres. A segunda ponte (Difícil) ainda não foi desenhada.
@@ -234,6 +241,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Ponte de luz arredondada (`LightBridge.cornerRadius`) e mais grossa (largura 0,85)
 - [x] Bloom e Vignette: `Global Volume` na cena Game
 - [x] Fundo com estrelas: `Effects/ParallaxLayer.cs`, 3 camadas no objeto `Background`
+- [x] Sprites da Kenney nas naves, inimigos, projéteis, nave-mãe e portal (`Art/`)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão

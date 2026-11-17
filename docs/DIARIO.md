@@ -779,3 +779,42 @@ centro.
 **Como testar:** Play na cena Game. O céu desliza devagar para a esquerda, a camada da
 frente mais rápido que as de trás; Esc pausa e o fundo para. As estrelas só existem no
 Play (são criadas no `Start`).
+
+## 2026-11-17 — Visual, parte 3: sprites da Kenney
+
+**O que foi feito:** as formas provisórias viraram sprites do pacote **Space Shooter
+(Remastered)** da Kenney (licença CC0, domínio público). Só as 11 imagens usadas foram
+copiadas para `Assets/_Project/Art/`, com nomes do jogo; `Art/CREDITOS.txt` registra a origem
+de cada uma.
+
+| Objeto | Imagem | Escala |
+| --- | --- | --- |
+| Caça / Bombardeiro / Cruzador | `playerShip1/2/3_blue` | 0,8 / 1 / 1,1 |
+| Drone / Caça alienígena / Couraçado | `enemyRed1/2/4` | 0,6 / 0,8 / 1,1 |
+| Laser do Caça / Raio do Cruzador | `laserBlue01` / `laserBlue16` | 1 |
+| Míssil do Bombardeiro | `laserRed16` | 1 |
+| Nave-mãe / Portal (cena) | `ufoBlue` / `ufoRed` | 3 / 1,8 |
+
+**Por quê assim:**
+- **Lados por cor:** naves do jogador azuis, inimigos laranja-avermelhados. Dá para saber
+  quem é quem sem ler nada.
+- **Formato pela função:** o Caça é a nave pequena, o Bombardeiro a mais larga, o Cruzador a
+  mais comprida; entre os inimigos, o Drone é o menor e o Couraçado o mais robusto.
+- **Só as imagens usadas** vão para o repositório (não as 295 do pacote), com nomes nossos:
+  `Art/Towers/Caca.png` diz mais que `playerShip1_blue.png`.
+- **Cor branca no Sprite Renderer:** a cor multiplica a imagem; as cores dos provisórios
+  escureceriam os sprites.
+- **Escala igual em X e Y:** os provisórios eram esticados para imitar formatos.
+
+**Problemas no caminho:**
+- **Inimigos de ré:** as naves inimigas do pacote apontam para baixo. `Sprite Angle Offset`
+  do `Enemy` passou de -90 para **90**.
+- **Collider dos projéteis:** o raio é multiplicado pela escala do objeto; com a escala de
+  0,12 para 1, o raio caiu para 0,15 (senão o laser acertaria a um metro de distância).
+- **Tudo preto:** o `Global Light 2D` do template iluminava só a Sorting Layer `Default`.
+  Sprites com `Sprite-Lit-Default` nas layers `Ships` e `Enemies` não recebiam luz nenhuma, e
+  cor × luz zero = preto. As formas provisórias eram escuras e o problema passou despercebido.
+  Correção: **Target Sorting Layers = All**.
+
+**Como testar:** Play na cena Game: naves e inimigos coloridos, inimigos andando de frente
+pela ponte, tiros acertando só ao encostar, inimigos tirando vida da nave-mãe.
