@@ -77,6 +77,9 @@ Assets/_Project/
 - Dano em área: `SplashRadius` no `TowerData` (0 = sem área). O `Projectile` explode no
   primeiro inimigo que toca e tira o mesmo dano dos vizinhos no raio, buscando só na
   layer `Enemy`. A mira `MostClustered` escolhe o inimigo com mais vizinhos nesse raio.
+- **Brilho = Bloom**: brilha o que for mais claro que o Threshold (0,6) do `GameVolumeProfile`.
+  Para algo brilhar, cor clara e material `Sprite-Unlit-Default`; para não brilhar, cor mais
+  escura. O HUD (Canvas Screen Space - Overlay) não passa pelo pós-processamento.
 - **Materiais sempre do URP**, nunca os embutidos do pipeline antigo
   (`Sprites-Default`, `Default-Line`): esses não respondem ao Bloom nem às luzes
   2D. Ficam em Packages → Universal RP → Runtime → Materials.
@@ -158,7 +161,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 
 | Objeto | Posição | Escala | Sorting Layer | Material | Observação |
 | --- | --- | --- | --- | --- | --- |
-| Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A` |
+| Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A`, Post Processing ligado |
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1 |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
@@ -170,6 +173,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça, Bombardeiro, Cruzador |
 | HUD_Canvas | — | — | — | — | Canvas Scaler 1920×1080 (match 0,5), componente `HUD`; filhos `TopBar`, `CountdownText`, `PausePanel`, `EndPanel` |
 | EventSystem | — | — | — | — | `InputSystemUIInputModule` |
+| Global Volume | — | — | — | — | perfil `Assets/Settings/GameVolumeProfile` (Bloom: Threshold 0,6, Intensity 1,5, Scatter 0,7; Vignette 0,3). A Main Camera tem **Post Processing** ligado |
 
 O Caça solto em (-6, 0) saiu da cena: a nave agora nasce nos slots.
 
@@ -227,10 +231,11 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   `Projectile`; assets e prefabs (valores na tabela "Naves-torre"); ligados no menu de construção
   e testados no Unity
 - [x] Ponte de luz arredondada (`LightBridge.cornerRadius`) e mais grossa (largura 0,85)
+- [x] Bloom e Vignette: `Global Volume` na cena Game
 - [ ] Fundo com estrelas (parallax)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
-- [ ] Efeitos e sons: partículas, Bloom, tremida de câmera, SFX e música (inclui a explosão
+- [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
   e o rastro de fumaça do míssil do Bombardeiro)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README

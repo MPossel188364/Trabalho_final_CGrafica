@@ -716,3 +716,33 @@ sobreporem.
 
 **Como testar:** na Scene view, as quinas aparecem arredondadas; ao mudar o `Corner Radius`
 a ponte se refaz na hora. No Play, os inimigos fazem a curva em cima da linha.
+
+## 2026-11-17 — Visual, parte 1: Bloom e Vignette
+
+**O que foi feito:**
+- Main Camera: **Rendering → Post Processing** ligado (estava desligado; sem isso nenhum
+  efeito de Volume aparece).
+- `Global Volume` na cena Game, com o perfil `Assets/Settings/GameVolumeProfile.asset`
+  (junto dos outros assets de render do template):
+  - **Bloom:** Threshold 0,6, Intensity 1,5, Scatter 0,7;
+  - **Vignette:** Intensity 0,3.
+- Nenhuma linha de código: é configuração do URP. Atende ao requisito de pós-processamento
+  do PDF.
+
+**Como o Bloom funciona:** depois que a cena é desenhada, o URP separa os pixels mais claros
+que o **Threshold**, borra essa imagem em várias resoluções (o **Scatter** controla o quanto o
+borrão se espalha) e soma o resultado por cima da imagem original com a força da
+**Intensity**. Como o fundo é quase preto (`0B0E1A`), só o que é claro ganha halo: a ponte
+ciano, os lasers e o portal. A **Vignette** escurece as bordas da tela e puxa o olhar para o
+centro.
+
+**Por quê assim:**
+- **Global Volume:** vale para a câmera inteira, em qualquer posição. Um Volume local só
+  aplicaria o efeito dentro de um collider.
+- **Threshold 0,6:** abaixo disso as naves cinza e o fundo também brilhariam e a imagem
+  ficaria lavada; acima, a ponte ciano (azul no máximo, verde em 0,88) quase não brilharia.
+- **O HUD não brilha:** está num Canvas *Screen Space - Overlay*, desenhado depois do
+  pós-processamento, então os textos continuam nítidos.
+
+**Como testar:** Play na cena Game: a ponte, os lasers e o portal ganham halo; desligar o
+`Global Volume` (checkbox no Inspector) mostra a diferença.
