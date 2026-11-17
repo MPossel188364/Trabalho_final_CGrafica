@@ -47,7 +47,6 @@ Assets/_Project/
     Data/      TowerData, EnemyData, DifficultyData
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
-    Player/    Astronaut
     UI/        HUD, MainMenu, BuildMenuUI
     Effects/   CameraShake, ParallaxLayer
     Editor/    BuildSlotSetup (só existe no editor, não entra no build)
@@ -137,7 +136,9 @@ Assets/_Project/
 ## Mapa (cena Game)
 
 Ponte de luz principal (Fácil), objeto `LightBridge_A` com estes waypoints filhos,
-em ordem (o `LightBridge` usa a ordem da Hierarchy, não o nome). Comprimento total: **59,5 unidades** (o requisito de 30 inimigos
+em ordem (o `LightBridge` usa a ordem da Hierarchy, não o nome). As quinas viram curvas
+(`Corner Radius` = 1,5), então os inimigos passam perto dos waypoints do meio, mas não por
+cima deles. Comprimento total com as curvas: **≈ 55 unidades** (o requisito de 30 inimigos
 enfileirados pede 18).
 
 | Waypoint | Posição (x, y) | Observação |
@@ -159,14 +160,14 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | --- | --- | --- | --- | --- | --- |
 | Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A` |
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1 |
-| LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,15, 4 corner vertices |
+| LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
 | Portal_A | (-14.8, 4.5) | 1.5 | Ships | Sprite-Lit-Default | círculo roxo provisório |
 | Mothership | (13.8, 0) | (2.5, 4) | Ships | Sprite-Lit-Default | quadrado cinza provisório, tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
 | WaveSpawner | (0, 0) | — | — | — | Bridges = `LightBridge_A`, Session = `GameSession`; a dificuldade vem do `GameManager` (`Begin`); gera os inimigos (nenhum inimigo fica na cena antes do Play) |
-| BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça |
+| BuildController | (0, 0) | — | — | — | `BuildController` + `BuildMenuUI`; `Tower Prefabs` = Caça, Bombardeiro, Cruzador |
 | HUD_Canvas | — | — | — | — | Canvas Scaler 1920×1080 (match 0,5), componente `HUD`; filhos `TopBar`, `CountdownText`, `PausePanel`, `EndPanel` |
 | EventSystem | — | — | — | — | `InputSystemUIInputModule` |
 
@@ -192,7 +193,7 @@ iniciais um pouco diferentes (o Caça foi rebalanceado de 5 para 3 de dano).
 | Cruzador | 120 | 7 | 0,5 | 40 | 0 (sem área) | 30 | 270 | `Strongest` (o de mais vida) |
 
 Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projéteis
-`Laser_Caca`, `Missil_Bombardeiro` e `Raio_Cruzador`. Por enquanto só o Caça está na lista
+`Laser_Caca`, `Missil_Bombardeiro` e `Raio_Cruzador`. As três estão na lista
 `Tower Prefabs` do `BuildController` da cena.
 
 ## Estado atual
@@ -222,18 +223,14 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   derrota; créditos, vida da nave-mãe e tempo vêm do `DifficultyData`
 - [x] HUD (`UI/HUD.cs` + `HUD_Canvas` na cena): vida da nave-mãe, onda, cronômetro, créditos e
   pontos no topo; contagem antes de cada onda; telas de pausa e de fim com "Jogar de novo"
-- [x] Bombardeiro e Cruzador: **código e assets escritos, ainda não compilados nem testados
-  no Unity** (feitos sem o editor aberto; estão na branch `feature/torres-bombardeiro-cruzador`,
-  tirar esta nota ao fazer o merge). `TowerData.SplashRadius`, mira `MostClustered` e dano em
-  área no `Projectile`; `Data/Bombardeiro.asset` e `Data/Cruzador.asset`; prefabs das naves e
-  dos projéteis (valores na tabela "Naves-torre")
-- [ ] Testar no Unity e ligar as duas naves no `BuildController` da cena (lista Tower Prefabs,
-  de 1 para 3 elementos). **A cena ainda não foi alterada.** Passo a passo na entrada de 15/11
-  do `docs/DIARIO.md`; depois de testar, salvar a cena e commitar o `Game.unity`
+- [x] Bombardeiro e Cruzador: `TowerData.SplashRadius`, mira `MostClustered` e dano em área no
+  `Projectile`; assets e prefabs (valores na tabela "Naves-torre"); ligados no menu de construção
+  e testados no Unity
+- [x] Ponte de luz arredondada (`LightBridge.cornerRadius`) e mais grossa (largura 0,85)
 - [ ] Fundo com estrelas (parallax)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, Bloom, tremida de câmera, SFX e música (inclui a explosão
   e o rastro de fumaça do míssil do Bombardeiro)
-- [ ] Astronauta (opcional; é o primeiro a cortar se o prazo apertar)
+- ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README

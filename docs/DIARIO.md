@@ -668,3 +668,51 @@ abertura do projeto é o teste.
    do `BuildController`. Se mexer nos números dos assets das naves ao balancear, use
    **File → Save Project** (a cena salva não grava ScriptableObject). Se algo deu
    errado, desfaça o passo 3 e o jogo volta a ser o de antes.
+
+## 2026-11-17 — Bombardeiro e Cruzador no menu de construção
+
+**O que foi feito:** as naves do Matheus (entrada de 15/11) entraram no jogo. A lista
+`Tower Prefabs` do `BuildController` na cena passou de 1 para 3 elementos: `Caca`,
+`Bombardeiro` e `Cruzador`. Nenhuma linha de código mudou.
+
+**Por quê assim:** o `BuildMenuUI` cria um botão por prefab da lista dentro de um
+`VerticalLayoutGroup`, então a terceira nave já aparece no menu sem mexer na interface. É o
+padrão "nave nova = acrescentar o prefab em `Tower Prefabs`" funcionando como previsto.
+
+**Testado:** as três naves aparecem no menu com o custo e podem ser compradas. O
+Bombardeiro acerta vários inimigos de uma vez quando eles passam juntos e o Cruzador
+alcança longe com tiro lento e forte. Nenhum erro no Console: os assets e prefabs escritos
+sem o editor aberto estavam corretos.
+
+## 2026-11-17 — Ponte de luz arredondada e mais grossa; astronauta cortado
+
+**O que foi feito:**
+- `LightBridge.cs`: campos `Corner Radius` (raio das curvas, 1,5 na cena) e
+  `Corner Segments` (pedaços retos de cada curva, 10). O `Rebuild` troca cada waypoint do
+  meio por uma curva antes de desenhar a linha.
+- Na cena, o `Line Renderer` do `LightBridge_A` ficou com largura 0,85 (antes 0,15) e
+  6 *cap vertices* (pontas arredondadas).
+- O astronauta saiu do plano (doc de design e CLAUDE.md): o PDF não o exige e o tempo que
+  sobra até a entrega vai para o visual.
+
+**Como a curva é feita:** em cada quina, a curva começa `radius` unidades antes dela, no
+trecho reto de chegada, e termina `radius` unidades depois, no trecho de saída. Entre os
+dois pontos é uma **curva de Bézier quadrática** com a quina como ponto de controle:
+`P(t) = (1-t)²·início + 2(1-t)t·quina + t²·fim`, com `t` de 0 a 1. Ela sai na direção do
+trecho de chegada e chega na direção do de saída, por isso não há tranco na troca entre reta
+e curva. O raio é limitado à metade do trecho mais curto, para duas curvas vizinhas não se
+sobreporem.
+
+**Por quê assim:**
+- **A curva é calculada no caminho, não só no desenho.** O Line Renderer tem a opção
+  *Corner Vertices*, mas ela só arredonda a malha da linha; os inimigos continuariam virando
+  em ângulo reto, por fora da curva. Como o `LightBridge` entrega os mesmos pontos para a
+  linha e para o `Enemy` (`GetWaypoint`), os dois seguem a mesma curva. O `Enemy` não mudou:
+  ele só recebe mais pontos, mais próximos.
+- **Os waypoints continuam sendo as quinas.** Para mudar o mapa, ainda é só arrastar os
+  filhos; a curva é refeita sozinha no editor (`[ExecuteAlways]`).
+- O comprimento caiu de 59,5 para ≈ 55 unidades, bem acima das 18 que o requisito dos 30
+  inimigos enfileirados pede.
+
+**Como testar:** na Scene view, as quinas aparecem arredondadas; ao mudar o `Corner Radius`
+a ponte se refaz na hora. No Play, os inimigos fazem a curva em cima da linha.
