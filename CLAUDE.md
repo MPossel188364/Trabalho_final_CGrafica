@@ -103,6 +103,9 @@ Assets/_Project/
 - **Construir** = `BuildController` (clique) → `BuildMenuUI` (escolha) → `GameSession`
   (cobra) → `BuildSlot` (instancia). O custo vem do `TowerData` da nave. Nave nova no
   jogo = acrescentar o prefab em `Tower Prefabs` do `BuildController`.
+- **Vender** = clique num slot ocupado → `BuildMenuUI.ShowSell` → `BuildSlot.TryClear` →
+  `GameSession.AddCredits`. A fração devolvida é o `Sell Refund` do `DifficultyData` (1 no
+  Fácil), repassada pelo `GameManager` em `buildController.Begin`.
 - **`BuildMenuUI` monta o próprio Canvas e botões por código** (uGUI + `Text` legado,
   fonte `LegacyRuntime.ttf`) e cria um `EventSystem` se a cena não tiver nenhum. O
   projeto usa só o **novo Input System**: ler mouse/teclado com `Mouse.current` e
@@ -172,7 +175,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
 | Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Lit-Default | sprite `Art/Base/Portal` (Kenney) |
 | Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
-| BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger) |
+| BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,35, que cobre a nave posicionada) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
 | WaveSpawner | (0, 0) | — | — | — | Bridges = `LightBridge_A`, Session = `GameSession`; a dificuldade vem do `GameManager` (`Begin`); gera os inimigos (nenhum inimigo fica na cena antes do Play) |
@@ -242,6 +245,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Bloom e Vignette: `Global Volume` na cena Game
 - [x] Fundo com estrelas: `Effects/ParallaxLayer.cs`, 3 camadas no objeto `Background`
 - [x] Sprites da Kenney nas naves, inimigos, projéteis, nave-mãe e portal (`Art/`)
+- [x] Venda de naves: clique na nave → "Vender" devolve 100% do custo (`Sell Refund`)
 - [ ] Dificuldade Difícil: `Dificil.asset` (~50 inimigos, 5 ondas) e segundo portal e ponte
 - [ ] Menu principal, Ranking (top 5 em PlayerPrefs) e tela Sobre: cena `MainMenu` no build
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão

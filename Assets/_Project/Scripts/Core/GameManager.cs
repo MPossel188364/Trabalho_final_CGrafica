@@ -72,6 +72,8 @@ namespace NebulaGuard
 
             session.Begin(difficulty.StartingCredits);
             motherShip.Begin(difficulty.MotherShipHealth);
+            if (buildController != null)
+                buildController.Begin(difficulty.SellRefund);
             TimeRemaining = difficulty.TimeLimit;
 
             SetState(GameState.Preparing);

@@ -10,9 +10,10 @@ using UnityEngine.InputSystem.UI;
 namespace NebulaGuard
 {
     /// <summary>
-    /// Menu que aparece ao lado do slot clicado, com um botão por nave (nome e custo) e o
-    /// saldo de créditos. Só desenha e avisa qual botão foi apertado (OptionChosen); quem
-    /// cobra e posiciona é o BuildController. O Canvas, o painel e os botões são criados
+    /// Menu que aparece ao lado do slot clicado. Slot livre: um botão por nave (nome e
+    /// custo) e o saldo de créditos. Slot ocupado: um botão de venda com o valor devolvido.
+    /// Só desenha e avisa qual botão foi apertado (OptionChosen, SellChosen); quem cobra,
+    /// posiciona e vende é o BuildController. O Canvas, o painel e os botões são criados
     /// por código ao iniciar, então não há nada para montar na cena.
     /// </summary>
     public class BuildMenuUI : MonoBehaviour
@@ -21,9 +22,13 @@ namespace NebulaGuard
 
         private static readonly Color PanelColor = new Color(0.04f, 0.07f, 0.16f, 0.92f);
         private static readonly Color ButtonColor = new Color(0.12f, 0.35f, 0.5f, 1f);
+        private static readonly Color SellColor = new Color(0.55f, 0.16f, 0.16f, 1f);
 
         /// <summary>Disparado com o índice da nave escolhida (posição na lista do BuildController).</summary>
         public event Action<int> OptionChosen;
+
+        /// <summary>Disparado quando o jogador aperta "Vender" no menu de um slot ocupado.</summary>
+        public event Action SellChosen;
 
         private RectTransform canvasRect;
         private RectTransform panel;
@@ -44,8 +49,26 @@ namespace NebulaGuard
         {
             ClearButtons();
             for (int i = 0; i < towers.Count; i++)
-                AddButton(i, towers[i].Data.DisplayName, towers[i].Data.Cost);
+            {
+                int index = i; // cópia para o botão lembrar o próprio índice
+                AddButton($"{towers[i].Data.DisplayName} — {towers[i].Data.Cost}", towers[i].Data.Cost,
+                    ButtonColor, () => OptionChosen?.Invoke(index));
+            }
 
+            Open(worldPosition, currentCredits);
+        }
+
+        /// <summary>Abre o menu de venda de um slot ocupado: um botão com o valor que volta.</summary>
+        public void ShowSell(Vector3 worldPosition, string towerName, int refund, int currentCredits)
+        {
+            ClearButtons();
+            // Custo 0: vender sempre está liberado, com qualquer saldo.
+            AddButton($"Vender {towerName} (+{refund})", 0, SellColor, () => SellChosen?.Invoke());
+            Open(worldPosition, currentCredits);
+        }
+
+        private void Open(Vector3 worldPosition, int currentCredits)
+        {
             credits = currentCredits;
             RefreshState();
 
@@ -129,21 +152,20 @@ namespace NebulaGuard
             creditsLabel = CreateLabel(panel, "Créditos", 28, FontStyle.Bold);
         }
 
-        private void AddButton(int index, string towerName, int cost)
+        private void AddButton(string label, int cost, Color color, Action onClick)
         {
-            var buttonObject = new GameObject($"Option_{index}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            var buttonObject = new GameObject($"Option_{buttons.Count}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             buttonObject.transform.SetParent(panel, false);
-            buttonObject.GetComponent<Image>().color = ButtonColor;
+            buttonObject.GetComponent<Image>().color = color;
             var element = buttonObject.GetComponent<LayoutElement>();
             element.minHeight = 56f;
             element.minWidth = 280f; // o painel acompanha o maior filho; sem isso o nome da nave quebraria em duas linhas
 
-            Text text = CreateLabel(buttonObject.GetComponent<RectTransform>(), $"{towerName} — {cost}", 28, FontStyle.Normal);
+            Text text = CreateLabel(buttonObject.GetComponent<RectTransform>(), label, 28, FontStyle.Normal);
             text.alignment = TextAnchor.MiddleCenter;
 
             var button = buttonObject.GetComponent<Button>();
-            int captured = index; // cópia para o botão lembrar o próprio índice
-            button.onClick.AddListener(() => OptionChosen?.Invoke(captured));
+            button.onClick.AddListener(() => onClick());
 
             buttons.Add(button);
             costs.Add(cost);

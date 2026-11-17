@@ -818,3 +818,34 @@ de cada uma.
 
 **Como testar:** Play na cena Game: naves e inimigos coloridos, inimigos andando de frente
 pela ponte, tiros acertando só ao encostar, inimigos tirando vida da nave-mãe.
+
+## 2026-11-17 — Venda de naves
+
+**O que foi feito:** clicar numa nave já posicionada abre o menu com o botão
+**"Vender <nave> (+valor)"**; vendendo, a nave sai, o slot fica livre e os créditos voltam.
+- `BuildController`: clique em slot livre → menu de compra (como antes); em slot ocupado →
+  menu de venda. `OnSellChosen` lê o valor, chama `BuildSlot.TryClear` e devolve os créditos
+  com `GameSession.AddCredits`.
+- `BuildSlot.TryClear()`: destrói a nave e libera o slot (o marcador volta a aparecer).
+- `BuildMenuUI.ShowSell(...)` e o evento `SellChosen`: um botão vermelho de venda. A criação
+  de botão virou um método só (`AddButton(texto, custo, cor, ação)`), usado pela compra e
+  pela venda.
+- `DifficultyData.sellRefund` (**Sell Refund**, de 0 a 1; 1 = devolve tudo). O `GameManager`
+  repassa para o `BuildController` com `Begin`, como já fazia com créditos e vida.
+- Prefab `BuildSlot`: raio do collider de 0,1 para 0,35 (0,7 no mundo, com a escala 2), para
+  o clique em qualquer parte da nave acertar o slot.
+
+**Por quê assim:**
+- **Devolução de 100%** (decisão do grupo): o jogador pode reorganizar as naves quando
+  quiser. Fica num ScriptableObject, não fixo no código, porque é número de balanceamento: o
+  Difícil pode devolver menos mudando só o asset. O `Facil.asset` não precisou mudar: campo
+  novo que não existe no asset assume o valor padrão do script (1).
+- **O valor é lido antes de destruir a nave:** depois do `TryClear` o objeto não existe mais.
+- **Mesma divisão de papéis da compra:** o menu só mostra e avisa, o slot só guarda a nave,
+  o `GameSession` é o único que mexe nos créditos, e o `BuildController` liga os três.
+- **O clique é no slot, não na nave:** as naves não têm collider (nem precisam: os inimigos
+  são achados pelo `OverlapCircle` da nave). Aumentar o collider do slot resolve o clique sem
+  mexer nos prefabs das naves.
+
+**Como testar:** comprar um Caça (−50), clicar nele e vender (+50): a nave some e o círculo
+do slot volta; clicar no slot vazio abre de novo o menu de compra; Esc fecha o menu de venda.
