@@ -42,6 +42,9 @@ namespace NebulaGuard
         [SerializeField] private GameObject pausePanel;
         [SerializeField] private Button resumeButton;
 
+        [Tooltip("Opcional: botão \"Menu principal\" da tela de pausa.")]
+        [SerializeField] private Button pauseMenuButton;
+
         [Header("Fim de partida")]
         [SerializeField] private GameObject endPanel;
         [SerializeField] private TMP_Text endTitleText;
@@ -50,6 +53,12 @@ namespace NebulaGuard
         [Tooltip("Opcional: frase com o motivo do fim (\"A nave-mãe foi destruída\").")]
         [SerializeField] private TMP_Text endReasonText;
         [SerializeField] private Button restartButton;
+
+        [Tooltip("Opcional: botão \"Menu principal\" da tela de fim.")]
+        [SerializeField] private Button endMenuButton;
+
+        [Tooltip("Nome da cena do menu principal (precisa estar no Build Settings).")]
+        [SerializeField] private string menuSceneName = "MainMenu";
 
         [Tooltip("Segundos do fade da tela de fim.")]
         [SerializeField] private float endFadeDuration = 0.6f;
@@ -72,6 +81,10 @@ namespace NebulaGuard
                 restartButton.onClick.AddListener(Restart);
             if (resumeButton != null)
                 resumeButton.onClick.AddListener(gameManager.Resume);
+            if (pauseMenuButton != null)
+                pauseMenuButton.onClick.AddListener(BackToMenu);
+            if (endMenuButton != null)
+                endMenuButton.onClick.AddListener(BackToMenu);
 
             pausePanel.SetActive(false);
             endPanel.SetActive(false);
@@ -187,7 +200,7 @@ namespace NebulaGuard
                 endPanel.SetActive(true);
                 endTitleText.text = victory ? "VITÓRIA" : "DERROTA";
                 endTitleText.color = victory ? victoryColor : defeatColor;
-                endScoreText.text = $"Pontos: {session.Score}";
+                endScoreText.text = ScoreLine();
                 if (endReasonText != null)
                     endReasonText.text = Capitalize(gameManager.EndReason);
 
@@ -200,6 +213,24 @@ namespace NebulaGuard
         private void Restart()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        /// <summary>Volta ao menu principal. Tira a pausa antes: a cena nova não pode nascer parada.</summary>
+        private void BackToMenu()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(menuSceneName);
+        }
+
+        // "Pontos: 120", com a posição quando a partida entrou no ranking (top 5).
+        private string ScoreLine()
+        {
+            int position = gameManager.LastRankingPosition;
+            if (position == 1)
+                return $"Pontos: {session.Score} - novo recorde!";
+            if (position > 1)
+                return $"Pontos: {session.Score} - #{position} no ranking";
+            return $"Pontos: {session.Score}";
         }
 
         private static string Capitalize(string text) =>
