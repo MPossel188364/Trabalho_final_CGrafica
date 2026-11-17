@@ -24,8 +24,7 @@ namespace NebulaGuard
     /// <summary>
     /// Dados de uma dificuldade (Fácil, Difícil): as ondas e o ritmo delas, e os
     /// multiplicadores aplicados aos inimigos, e os números da partida (créditos iniciais,
-    /// vida da nave-mãe, tempo máximo). Um asset por dificuldade.
-    /// O multiplicador de pontos do plano entra aqui junto com o ranking.
+    /// vida da nave-mãe, tempo máximo) e o multiplicador de pontos. Um asset por dificuldade.
     /// </summary>
     [CreateAssetMenu(fileName = "DifficultyData", menuName = "NebulaGuard/Difficulty Data")]
     public class DifficultyData : ScriptableObject
@@ -56,9 +55,13 @@ namespace NebulaGuard
         [Tooltip("Multiplica a velocidade de todos os inimigos.")]
         [Min(0.1f)] [SerializeField] private float speedMultiplier = 1f;
 
+        [Tooltip("Multiplica os pontos ganhos ao destruir inimigos (o Difícil vale mais no ranking).")]
+        [Min(0.1f)] [SerializeField] private float scoreMultiplier = 1f;
+
         [SerializeField] private List<Wave> waves = new List<Wave>();
 
         public string DisplayName => displayName;
+        public float ScoreMultiplier => scoreMultiplier;
         public int StartingCredits => startingCredits;
         public int MotherShipHealth => motherShipHealth;
         public float TimeLimit => timeLimit;

@@ -22,6 +22,7 @@ namespace NebulaGuard
     /// </summary>
     public class GameManager : MonoBehaviour
     {
+        [Tooltip("Dificuldade usada ao abrir a cena Game direto no editor. Vinda do menu principal, vale a que o jogador escolheu.")]
         [SerializeField] private DifficultyData difficulty;
         [SerializeField] private WaveSpawner waveSpawner;
         [SerializeField] private MotherShip motherShip;
@@ -41,6 +42,9 @@ namespace NebulaGuard
         /// <summary>Segundos que faltam no cronômetro. Começa a contar na primeira onda.</summary>
         public float TimeRemaining { get; private set; }
 
+        /// <summary>Posição (1 a 5) da partida no ranking quando ela termina; 0 se não entrou.</summary>
+        public int LastRankingPosition { get; private set; }
+
         /// <summary>Avisa cada troca de estado (o HUD mostra pausa, vitória, derrota).</summary>
         public event Action<GameState> StateChanged;
 
@@ -48,6 +52,10 @@ namespace NebulaGuard
         {
             // Se a cena foi recarregada depois de um fim de partida, o tempo estava parado.
             Time.timeScale = 1f;
+
+            // Veio do menu principal: vale a dificuldade que o jogador escolheu lá.
+            if (GameSettings.SelectedDifficulty != null)
+                difficulty = GameSettings.SelectedDifficulty;
         }
 
         private void OnEnable()
@@ -73,7 +81,8 @@ namespace NebulaGuard
                 return;
             }
 
-            session.Begin(difficulty.StartingCredits);
+            LastRankingPosition = 0;
+            session.Begin(difficulty.StartingCredits, difficulty.ScoreMultiplier);
             motherShip.Begin(difficulty.MotherShipHealth);
             if (buildController != null)
                 buildController.Begin(difficulty.SellRefund);
@@ -162,7 +171,12 @@ namespace NebulaGuard
             Time.timeScale = 0f; // congela inimigos, naves e projéteis
 
             EndReason = reason;
-            Debug.Log($"Fim de partida: {(victory ? "VITÓRIA" : "DERROTA")} ({reason}). Pontos: {session.Score}.");
+
+            // Toda partida terminada, com vitória ou derrota, tenta entrar no ranking. Precisa
+            // vir antes do SetState: o HUD lê a posição quando recebe o aviso de fim.
+            LastRankingPosition = Ranking.Submit(session.Score, difficulty.DisplayName);
+
+            Debug.Log($"Fim de partida: {(victory ? "VITÓRIA" : "DERROTA")} ({reason}). Pontos: {session.Score}. Posição no ranking: {LastRankingPosition}.");
             SetState(victory ? GameState.Victory : GameState.Defeat);
         }
 
