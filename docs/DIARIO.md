@@ -923,3 +923,61 @@ escuro); a ferramenta aplicou o mesmo aos botões "Continuar" e "Jogar de novo" 
 **Como testar:** Play; clicar num slot vazio mostra as 3 naves com desenho e custo; com 100
 créditos o Cruzador (120) aparece apagado e com custo vermelho; comprar um Caça e clicar
 nele mostra o botão vermelho "Vender +50".
+
+## 2026-11-17 — Menu principal, Ranking e Sobre (código)
+
+**O que foi feito:**
+- `Core/GameSettings.cs`: classe estática com `SelectedDifficulty`. O menu escreve, o
+  `GameManager` lê no `Awake`.
+- `Core/Ranking.cs`: top 5 em `PlayerPrefs` (JSON via `JsonUtility`). `Submit(pontos, dificuldade)`
+  devolve a posição (1 a 5) ou 0. Partida com 0 pontos não entra; empate fica atrás de quem
+  já estava. O `GameManager` chama `Submit` ao fim de toda partida e o HUD mostra a posição.
+- `DifficultyData.ScoreMultiplier` (Fácil ×1, Difícil ×2), aplicado em `GameSession.AddScore`.
+- `UI/MainMenu.cs`: Jogar (escolha da dificuldade), Ranking (com "Limpar ranking"), Sobre e Sair,
+  tudo montado por código, como o `BuildMenuUI`.
+- `HUD`: botão "Menu principal" na pausa e na tela de fim; a linha de pontos mostra "novo recorde!"
+  ou "#N no ranking".
+- `Editor/MainMenuSetup.cs` (**NebulaGuard → Montar cena MainMenu**): cria `MainMenu.unity`
+  (câmera, fundo de estrelas, objeto `MainMenu`), põe as duas cenas no Build Settings
+  (MainMenu = índice 0) e acrescenta os botões "Menu principal" na cena Game.
+
+**Por quê assim:**
+- **Classe estática para a dificuldade:** é o jeito mais simples de um dado sobreviver à troca de
+  cena, sem objeto `DontDestroyOnLoad`.
+- **Multiplicador dentro do `GameSession`:** HUD, tela de fim e ranking leem o mesmo número.
+- **Ferramenta de editor que só acrescenta:** o grupo edita a `Game.unity` à mão; recriar a cena
+  apagaria o trabalho dos outros.
+- `Time.timeScale = 1` antes de carregar qualquer cena, senão o jogo abriria parado se a saída
+  fosse pela pausa.
+
+**Como testar (nada disso foi rodado no Unity):** rodar a ferramenta; Play na MainMenu; Jogar →
+Fácil → partida; Esc → "Menu principal" volta; perder/vencer e ver a linha do ranking; abrir
+Ranking e Sobre. **Escrever os nomes do grupo** no `About Text` do objeto `MainMenu`. Conferir se
+ã, ç e ó aparecem na fonte Kenvector (se virarem quadrados, falta fonte reserva).
+
+## 2026-11-17 — Dificuldade Difícil: ponte extra, dados e ferramenta
+
+**O que foi feito:**
+- `DifficultyData.BridgeCount` e `WaveSpawner.UseBridges`: a dificuldade diz quantas pontes usar;
+  as outras e o portal delas (`Second Bridge Objects`) ficam desligados. Com duas, os inimigos
+  se alternam entre elas.
+- `Data/Dificil.asset`: 5 ondas, 50 inimigos, nave-mãe com 15 de vida, 300 s, +25% de vida, +15% de
+  velocidade, venda devolve 70%, pontos ×2, 2 pontes.
+- `Editor/HardModeSetup.cs` (**NebulaGuard → Adicionar ponte do Difícil**): cria `LightBridge_B`
+  (reta de (-14, 0) a (12, 0)) e `Portal_B` em (-14,8; 0) na cena Game, liga no `WaveSpawner` e
+  inclui o Dificil na lista do menu, se ele já existir.
+
+**Por quê assim:**
+- **Ponte B reta em y = 0:** passa entre as duas fileiras de slots (y = ±2), dentro do alcance de
+  todas as naves. Tem ~26 unidades contra ≈ 55 da A: o jogador defende dois caminhos, um longo
+  e um curto e rápido, que é o que torna o Difícil diferente, e não só mais vida.
+- **Quantidade de pontes na dificuldade, não na cena:** o Fácil continua com uma ponte sem a
+  gente apagar nada da cena.
+- **Tempo estimado:** com velocidade ×1,15, ~50 s por onda e 10 s de preparação, 5 ondas cabem
+  nos 300 s com pouca folga.
+
+**Atenção:** os números do `Dificil.asset` são um palpite, **nunca testados**. Jogar e balancear
+(vida da nave-mãe, créditos, tamanho das ondas) antes da entrega.
+
+**Como testar:** rodar a ferramenta; no menu, Jogar → Difícil; os inimigos saem dos dois portais
+(A em zigue-zague, B reta); no Fácil, só o portal A aparece.
