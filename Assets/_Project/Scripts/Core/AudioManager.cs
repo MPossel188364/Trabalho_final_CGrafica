@@ -96,8 +96,33 @@ namespace NebulaGuard
         private MotherShip motherShip;
         private int lastHealth = -1;
 
-        // Cria o AudioManager uma única vez, antes da primeira cena.
+        // Com "Enter Play Mode Options" (domínio não recarregado), os campos estáticos sobram da
+        // partida anterior: zera antes de qualquer cena carregar.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            instance = null;
+        }
+
+        // Cria o AudioManager antes da primeira cena; se por algum motivo ainda não existir
+        // quando a cena já carregou, a segunda chamada (AfterSceneLoad) cria.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void BootstrapBeforeScene()
+        {
+            Bootstrap();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void BootstrapAfterScene()
+        {
+            if (instance == null)
+            {
+                Bootstrap();
+                // A cena já carregou sem ele: liga as ligações da cena atual agora.
+                instance.OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+            }
+        }
+
         private static void Bootstrap()
         {
             if (instance != null)
@@ -106,6 +131,7 @@ namespace NebulaGuard
             var holder = new GameObject("AudioManager");
             DontDestroyOnLoad(holder);
             holder.AddComponent<AudioManager>();
+            Debug.Log("AudioManager criado.");
         }
 
         private void Awake()
