@@ -18,6 +18,13 @@ namespace NebulaGuard
         [Tooltip("Mesmo ajuste do Enemy: sprites que apontam para cima precisam de -90.")]
         [SerializeField] private float spriteAngleOffset = -90f;
 
+        [Header("Efeito ao acertar (opcional)")]
+        [Tooltip("Prefab tocado no ponto do impacto (ex.: Prefabs/Effects/Explosao no míssil). Vazio = sem efeito.")]
+        [SerializeField] private ParticleSystem impactEffectPrefab;
+
+        [Tooltip("Tamanho do efeito para tiros sem área. Com raio de explosão, o tamanho é o próprio raio: o jogador vê a área que levou dano.")]
+        [Min(0.1f)] [SerializeField] private float impactEffectSize = 0.4f;
+
         private Enemy target;
         private float damage;
         private float speed;
@@ -68,6 +75,9 @@ namespace NebulaGuard
 
             if (splashRadius > 0f)
                 DamageNearby(enemy);
+
+            float effectSize = splashRadius > 0f ? splashRadius : impactEffectSize;
+            EffectSpawner.Play(impactEffectPrefab, transform.position, effectSize);
 
             Destroy(gameObject);
         }

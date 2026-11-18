@@ -48,18 +48,19 @@ Assets/_Project/
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
     UI/        HUD, MainMenu, BuildMenuUI
-    Effects/   CameraShake, ParallaxLayer
-    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup (só existem no editor, não entram no build)
+    Effects/   CameraShake, ParallaxLayer, DeathEffect, EffectSpawner
+    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup, EffectsSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
-  Prefabs/     naves, inimigos, projéteis, efeitos
+  Prefabs/     naves, inimigos, projéteis; Effects/ (Explosao)
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
-  Art/         sprites (Towers, Enemies, Projectiles, Base), UI (botões e ícones), Fonts
+  Art/         sprites (Towers, Enemies, Projectiles, Base, Effects), UI (botões e ícones), Fonts
   Audio/       música e efeitos
   Materials/   pontes de luz, partículas
 ```
 
 Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não importa
-(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`).
+(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, e `gerar_particula.py`,
+que desenha o `Art/Effects/Particle.png`).
 
 ## Padrões de código
 
@@ -159,6 +160,14 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
+- **Efeitos de partículas:** um prefab só (`Prefabs/Effects/Explosao`), tocado por
+  `EffectSpawner.Play(prefab, posição, tamanho)`. O Particle System usa **Scaling Mode =
+  Hierarchy** (o tamanho é a escala do objeto), **Stop Action = Destroy** (some sozinho),
+  material `Sprite-Unlit-Default`, Sorting Layer `Effects` e o desenho da partícula no módulo
+  **Texture Sheet Animation** (modo Sprites). Efeito de morte = componente `DeathEffect` no
+  prefab do inimigo (escuta o `Died`); de impacto = campo `Impact Effect Prefab` do `Projectile`.
+- **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
+  eventos da `MotherShip`.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
   (`Died`, `ReachedBase`); quem reage (créditos, pontos, HUD) assina o evento.
 - Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
@@ -301,7 +310,11 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   collider do `BuildSlot` com raio 0,5
 - [ ] **Falta no Difícil:** continuar o balanceamento (vida da nave-mãe, tamanho das ondas) e
   atualizar a tabela de dificuldades do plano
-- [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
-  e o rastro de fumaça do míssil do Bombardeiro)
+- [x] **Explosões e tremida — código pronto:** `Effects/DeathEffect.cs`, `EffectSpawner.cs`,
+  `CameraShake.cs`, efeito de impacto no `Projectile` e a ferramenta `Editor/EffectsSetup.cs`
+  (**NebulaGuard → Adicionar explosões e tremida**)
+- [ ] Rodar a ferramenta no Unity e testar as explosões e a tremida
+- [ ] Efeitos, parte 2: rastro de fumaça do míssil do Bombardeiro
+- [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README

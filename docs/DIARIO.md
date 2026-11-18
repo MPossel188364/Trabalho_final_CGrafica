@@ -1009,3 +1009,49 @@ Ranking e Sobre. **Escrever os nomes do grupo** no `About Text` do objeto `MainM
 
 **Como testar:** Play na cena MainMenu → Difícil: começa com 150 créditos. Construir as três naves
 e ver que cabem nos corredores; clicar na ponta da asa abre o "Vender".
+
+## 2026-11-18 — Efeitos, parte 1: explosões e tremida da câmera (código)
+
+**O que foi feito:**
+- `Art/Effects/Particle.png`: disco branco de borda suave, desenhado por `tools/gerar_particula.py`
+  (mesmo jeito do ícone da moeda). É a "bolinha" de cada partícula.
+- `Effects/EffectSpawner.cs`: toca um prefab de partículas num ponto, com um tamanho.
+- `Effects/DeathEffect.cs`: vai no prefab do inimigo, escuta o `Died` dele e toca a explosão.
+- `Projectile.cs`: campos opcionais `Impact Effect Prefab` e `Impact Effect Size`. Ao acertar,
+  toca o efeito; se o tiro tem raio de explosão (míssil do Bombardeiro), o tamanho é o raio.
+- `Effects/CameraShake.cs`: na Main Camera, escuta a `MotherShip` e treme quando ela perde vida
+  (mais forte quanto maior o dano) e bem forte quando é destruída.
+- `Editor/EffectsSetup.cs`: menu **NebulaGuard → Adicionar explosões e tremida**. Cria o prefab
+  `Prefabs/Effects/Explosao` (Particle System), liga nos 3 inimigos e nos 3 projéteis e põe o
+  `CameraShake` na câmera da cena Game.
+
+**Por quê assim:**
+- **Particle System** (o sistema de partículas do Unity) em vez de animação de sprite: cada
+  explosão sai diferente (velocidade, tamanho e cor sorteados em faixas), e é um tema da disciplina.
+  A explosão tem duas partes: um **clarão** (uma partícula grande e branca que some em 0,15 s) e
+  **24 faíscas** que saem em círculo, são freadas pelo **arrasto** (abrem rápido e param), vão de
+  amarelo a vermelho escuro (**Color over Lifetime**) e encolhem (**Size over Lifetime**).
+- **Bloom de graça:** começam claras (acima do Threshold 0,6, brilham) e terminam escuras (param
+  de brilhar). Material `Sprite-Unlit-Default`, como tudo que brilha sozinho.
+- **O desenho vem do módulo Texture Sheet Animation (modo Sprites):** assim não foi preciso criar
+  um material novo só para a textura da partícula.
+- **Scaling Mode = Hierarchy:** o Particle System segue a escala do objeto, então um único prefab
+  serve para todos os tamanhos (Drone 0,7, Couraçado 1,5, impacto do laser 0,25). No míssil, o
+  tamanho é o raio de dano: o jogador **vê** a área que levou dano.
+- **Stop Action = Destroy:** o objeto da explosão se apaga sozinho quando a última faísca morre;
+  ninguém precisa lembrar de destruí-lo.
+- **`DeathEffect` separado do `Enemy`:** o `Enemy` só avisa que morreu (`Died`); quem quer reagir
+  assina o evento. Mesmo padrão do `GameSession` (créditos) e do `WaveSpawner`.
+- **Tremida por "trauma":** cada pancada soma trauma (0 a 1), que cai sozinho; o deslocamento é
+  trauma², então pancada pequena mal mexe e o fim é suave. A direção vem do **ruído de Perlin**
+  (um aleatório contínuo): a câmera balança em vez de pular de ponto em ponto. Roda no
+  `LateUpdate` (depois de tudo) e com `Time.unscaledDeltaTime`, para a tremida da derrota
+  acontecer mesmo com o jogo parado (`timeScale = 0`).
+- **Ferramenta de editor:** configurar um Particle System são ~30 campos; a ferramenta deixa
+  tudo igual nos três PCs. Como as outras, só acrescenta: prefab que já existe não é recriado,
+  então ajustes feitos à mão no Inspector ficam.
+
+**Como testar:** abrir o Unity, rodar **NebulaGuard → Adicionar explosões e tremida** e dar Play
+na cena MainMenu → Fácil. Inimigo destruído explode (o Couraçado, maior); o míssil do
+Bombardeiro explode do tamanho da área; laser e raio soltam uma faísca pequena ao acertar;
+inimigo que chega à nave-mãe faz a câmera tremer; na derrota, tremida forte.
