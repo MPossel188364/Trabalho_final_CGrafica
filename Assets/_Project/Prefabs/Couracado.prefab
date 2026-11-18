@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8177103417523483275}
   - component: {fileID: 8142490711994510087}
   - component: {fileID: 5603794497828213950}
+  - component: {fileID: 4332232648402556675}
   m_Layer: 6
   m_Name: Couracado
   m_TagString: Enemy
@@ -171,3 +172,17 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0.21133332}
   m_Radius: 0.49999997
+--- !u!114 &4332232648402556675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3556155862492020042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58fec897ea02c4f1291cf0bc8462ca65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.DeathEffect
+  explosionPrefab: {fileID: 6190309450643332728, guid: c1ae36a53ca5444e2a3c0afea20def21, type: 3}
+  size: 1.5
