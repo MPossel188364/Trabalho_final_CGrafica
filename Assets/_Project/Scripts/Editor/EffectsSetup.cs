@@ -13,6 +13,8 @@ namespace NebulaGuard.EditorTools
     ///  - Liga a explosão como efeito de impacto nos três projéteis (no míssil do
     ///    Bombardeiro ela fica do tamanho do raio de dano).
     ///  - Põe o CameraShake na Main Camera da cena Game, ligado à nave-mãe.
+    /// E, num item separado (NebulaGuard → Adicionar rastro de fumaça no míssil), o filho
+    /// Fumaca no prefab do míssil do Bombardeiro.
     /// Só acrescenta: prefab que já existe não é recriado (ajustes feitos no Inspector
     /// ficam) e campo já preenchido não é trocado. Para recriar a explosão do zero, apague o
     /// prefab e rode de novo.
@@ -88,6 +90,108 @@ namespace NebulaGuard.EditorTools
 
             AssetDatabase.SaveAssets();
             Debug.Log("Explosões e tremida prontas. Dê Play: inimigo destruído explode, o míssil explode do tamanho da área de dano e a câmera treme quando um inimigo chega à nave-mãe.");
+        }
+
+        // ---------- Rastro do míssil ----------
+
+        private const string MissilePath = Prefabs + "Missil_Bombardeiro.prefab";
+
+        // Cauda do míssil: a imagem tem 54 px de altura (0,54 unidade) e aponta para cima,
+        // então a traseira fica meia altura para baixo.
+        private const float MissileTailY = -0.27f;
+
+        [MenuItem("NebulaGuard/Adicionar rastro de fumaça no míssil")]
+        public static void SetupMissileTrail()
+        {
+            Sprite particle = PrepareSprite(ParticleSpritePath, "gerar_particula.py");
+            Material material = LoadUnlitMaterial();
+            if (particle == null || material == null)
+                return;
+
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(MissilePath) == null)
+            {
+                Debug.LogError($"Não achei {MissilePath}.");
+                return;
+            }
+
+            GameObject root = PrefabUtility.LoadPrefabContents(MissilePath);
+            var projectile = root.GetComponent<Projectile>();
+            if (projectile == null)
+            {
+                Debug.LogError("O prefab do míssil não tem o componente Projectile.");
+                PrefabUtility.UnloadPrefabContents(root);
+                return;
+            }
+
+            Transform smoke = root.transform.Find("Fumaca");
+            if (smoke == null)
+            {
+                var go = new GameObject("Fumaca");
+                go.transform.SetParent(root.transform, false);
+                go.transform.localPosition = new Vector3(0f, MissileTailY, 0f);
+                BuildSmoke(go.AddComponent<ParticleSystem>(), particle, material);
+                smoke = go.transform;
+            }
+
+            var serialized = new SerializedObject(projectile);
+            var trailProperty = serialized.FindProperty("trail");
+            if (trailProperty.objectReferenceValue == null)
+            {
+                trailProperty.objectReferenceValue = smoke.GetComponent<ParticleSystem>();
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(root, MissilePath);
+            PrefabUtility.UnloadPrefabContents(root);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Rastro de fumaça no míssil pronto. Dê Play e construa um Bombardeiro.");
+        }
+
+        /// <summary>
+        /// Fumaça: emite por distância (Rate over Distance), então o rastro fica contínuo em
+        /// qualquer velocidade. Em espaço World: cada nuvem fica onde nasceu e o míssil segue em
+        /// frente, desenhando a trilha. Nasce laranja (fogo do motor, brilha com o Bloom),
+        /// esfria para cinza (escuro, sem brilho), cresce e some.
+        /// </summary>
+        private static void BuildSmoke(ParticleSystem ps, Sprite particle, Material material)
+        {
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            var main = ps.main;
+            main.duration = 1f;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.7f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.05f, 0.3f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.12f, 0.2f);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, 2f * Mathf.PI);
+            main.startColor = Color.white; // a cor toda vem do Color over Lifetime
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            main.stopAction = ParticleSystemStopAction.Destroy; // depois de solto do míssil, some sozinho
+            main.maxParticles = 120;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.rateOverDistance = 14f; // nuvens por unidade percorrida
+
+            var shape = ps.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Circle; // espalha um pouco para os lados
+            shape.radius = 0.03f;
+
+            var color = ps.colorOverLifetime;
+            color.enabled = true;
+            color.color = Gradient(
+                new[] { new GradientColorKey(new Color(1f, 0.8f, 0.4f), 0f), new GradientColorKey(new Color(0.5f, 0.5f, 0.55f), 0.25f), new GradientColorKey(new Color(0.3f, 0.3f, 0.35f), 1f) },
+                new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.5f, 0.3f), new GradientAlphaKey(0f, 1f) });
+
+            var size = ps.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(1f, 1.8f)));
+
+            // Layer Projectiles, atrás do míssil (ordem -1): a fumaça sai de baixo dele.
+            ConfigureLook(ps, particle, material, sortingOrder: -1, sortingLayer: "Projectiles");
         }
 
         // ---------- Auxiliares (também usados pelo PortalSetup) ----------

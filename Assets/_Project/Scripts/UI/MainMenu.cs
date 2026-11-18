@@ -141,7 +141,7 @@ namespace NebulaGuard
         private GameObject BuildMainPanel()
         {
             GameObject panel = CreatePanel("Principal");
-            CreateText(panel.transform, "NEBULA GUARD", 130f, TitleColor);
+            CreateText(panel.transform, "SPACE DEFENSE", 130f, TitleColor);
             CreateText(panel.transform, "Defenda a nave-mãe", 44f, TextColor);
             CreateSpace(panel.transform, 50f);
 

@@ -1121,3 +1121,47 @@ explodiam antes de encostar na nave-mãe.
 
 **Como testar:** Play; a linha nasce na borda do portal; o inimigo que chega à nave-mãe entra
 no casco e explode em cima dela. No Difícil, o mesmo nas duas pontes.
+
+## 2026-11-18 — Nome do jogo: Space Defense
+
+**O que foi feito:** o jogo passou a se chamar **Space Defense** (era *Nebula Guard*).
+- Título do menu principal (`MainMenu.cs`): "SPACE DEFENSE".
+- `ProjectSettings` → **Product Name** = `Space Defense`: é o nome do `.exe`, o título da janela
+  e o nome que aparece no build.
+- Títulos do `README.md` e do `CLAUDE.md`.
+
+**O que ficou com o nome antigo, de propósito:** o namespace `NebulaGuard` dos scripts, o menu
+**NebulaGuard → …** das ferramentas, o menu *Create → NebulaGuard* dos ScriptableObjects e a
+chave do ranking (`NebulaGuard.Ranking`). O jogador não vê nada disso, e renomear mexeria em
+todos os scripts ao mesmo tempo em que os colegas trabalham neles (conflito de merge certo), sem
+ganho visível.
+
+**Efeito colateral:** o Unity guarda o PlayerPrefs (onde fica o ranking) numa pasta com o nome
+do produto. Com o nome novo, o ranking de testes antigo some: começa vazio.
+
+## 2026-11-18 — Efeitos, parte 2: rastro de fumaça do míssil
+
+**O que foi feito:**
+- `Projectile.cs`: campo opcional `Trail` (um Particle System filho). Antes de o projétil ser
+  apagado (acertou ou o tempo acabou), o rastro é **solto** (vira objeto sem pai) e para de
+  emitir. O tempo de vida passou a ser contado no `Update`, para os dois casos passarem pelo
+  mesmo `Despawn`.
+- `Editor/EffectsSetup.cs`: novo menu **NebulaGuard → Adicionar rastro de fumaça no míssil**, que
+  cria o filho `Fumaca` na cauda do `Missil_Bombardeiro` e liga no campo `Trail`.
+
+**Por quê assim:**
+- **Espaço World:** cada nuvem fica onde nasceu e o míssil segue em frente; é isso que desenha a
+  trilha. Em espaço Local a fumaça andaria grudada no míssil.
+- **Rate over Distance** (nuvens por unidade andada) em vez de por segundo: a trilha fica
+  contínua, sem buracos, em qualquer velocidade.
+- **Cor:** nasce laranja (fogo do motor, acima do Threshold, brilha com o Bloom), esfria para
+  cinza escuro (sem brilho), cresce e some.
+- **Soltar antes de apagar:** filho é destruído junto com o pai. Sem soltar, toda a fumaça
+  sumiria de uma vez quando o míssil explodisse. Solta, ela termina de se desfazer e o
+  `Stop Action = Destroy` apaga o objeto no fim.
+- **Por que não `Destroy(gameObject, lifetime)`:** ele apaga o objeto direto, sem passar pelo
+  código que solta o rastro.
+
+**Como testar:** rodar **NebulaGuard → Adicionar rastro de fumaça no míssil**, dar Play e construir
+um Bombardeiro: o míssil deixa uma trilha laranja que vira fumaça cinza; quando ele explode, a
+trilha termina de sumir devagar.

@@ -25,12 +25,16 @@ namespace NebulaGuard
         [Tooltip("Tamanho do efeito para tiros sem área. Com raio de explosão, o tamanho é o próprio raio: o jogador vê a área que levou dano.")]
         [Min(0.1f)] [SerializeField] private float impactEffectSize = 0.4f;
 
+        [Tooltip("Rastro (ex.: fumaça do míssil): Particle System filho, em espaço World. Vazio = sem rastro.")]
+        [SerializeField] private ParticleSystem trail;
+
         private Enemy target;
         private float damage;
         private float speed;
         private float splashRadius;
         private Vector2 direction;
         private bool hit;
+        private float age;
 
         /// <summary>
         /// A nave chama logo depois de instanciar o projétil no cano. O raio da explosão é
@@ -43,11 +47,19 @@ namespace NebulaGuard
             speed = newSpeed;
             splashRadius = newSplashRadius;
             direction = transform.up;
-            Destroy(gameObject, lifetime);
         }
 
         private void Update()
         {
+            // Some sozinho se não acertar nada. Contado aqui (e não com Destroy(obj, tempo))
+            // para passar pelo Despawn, que solta o rastro antes de apagar o projétil.
+            age += Time.deltaTime;
+            if (age >= lifetime)
+            {
+                Despawn();
+                return;
+            }
+
             // Enquanto o alvo vive, a direção é atualizada a cada frame (persegue).
             // "target != null" também é falso quando o objeto já foi destruído pelo Unity.
             if (target != null && target.IsAlive)
@@ -78,6 +90,22 @@ namespace NebulaGuard
 
             float effectSize = splashRadius > 0f ? splashRadius : impactEffectSize;
             EffectSpawner.Play(impactEffectPrefab, transform.position, effectSize);
+
+            Despawn();
+        }
+
+        /// <summary>
+        /// Apaga o projétil. O rastro é solto antes (vira objeto independente) e para de
+        /// emitir: a fumaça que já saiu se desfaz no tempo dela, em vez de sumir de uma vez
+        /// junto com o míssil. O Stop Action = Destroy do rastro apaga-o no fim.
+        /// </summary>
+        private void Despawn()
+        {
+            if (trail != null)
+            {
+                trail.transform.SetParent(null, true);
+                trail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
 
             Destroy(gameObject);
         }

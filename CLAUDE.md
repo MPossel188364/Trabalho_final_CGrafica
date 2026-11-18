@@ -1,4 +1,7 @@
-# Nebula Guard — contexto para IA
+# Space Defense — contexto para IA
+
+**Nome do jogo: Space Defense** (até 18/11 era *Nebula Guard*; o nome antigo ficou só por
+dentro: namespace `NebulaGuard`, menu **NebulaGuard → …** das ferramentas e a chave do ranking).
 
 Tower defense 2D no espaço, feito em Unity para a disciplina CCC300 (UPF, 2026/2),
 em trio. Entrega e apresentação em **24/11/2026**.
@@ -166,6 +169,9 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
   material `Sprite-Unlit-Default`, Sorting Layer `Effects` e o desenho da partícula no módulo
   **Texture Sheet Animation** (modo Sprites). Efeito de morte = componente `DeathEffect` no
   prefab do inimigo (escuta o `Died` e o `ReachedBase`); de impacto = campo `Impact Effect Prefab` do `Projectile`.
+- **Rastro de projétil:** Particle System filho em espaço **World**, ligado no campo `Trail` do
+  `Projectile`. O projétil some sempre pelo `Despawn`, que solta o rastro antes de se apagar
+  (não usar `Destroy(gameObject, tempo)` no projétil).
 - **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
   eventos da `MotherShip`.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
@@ -318,7 +324,10 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] **Portal novo — código pronto:** redemoinho animado (`PortalVortex`, `Art/Effects/PortalSwirl.png`)
   e a ferramenta `Editor/PortalSetup.cs` (**NebulaGuard → Trocar visual dos portais**)
 - [x] Portal novo e pontas das pontes (início na borda do portal, fim no centro da nave-mãe) testados no Unity
-- [ ] Efeitos, parte 2: rastro de fumaça do míssil do Bombardeiro
+- [x] **Rastro de fumaça do míssil — código pronto:** campo `Trail` no `Projectile` e o menu
+  **NebulaGuard → Adicionar rastro de fumaça no míssil**
+- [ ] Rodar a ferramenta do rastro no Unity e testar
+- [x] Nome do jogo: **Space Defense** (título do menu e Product Name)
 - [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README
