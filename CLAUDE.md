@@ -326,7 +326,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Portal novo e pontas das pontes (início na borda do portal, fim no centro da nave-mãe) testados no Unity
 - [x] **Rastro de fumaça do míssil — código pronto:** campo `Trail` no `Projectile` e o menu
   **NebulaGuard → Adicionar rastro de fumaça no míssil**
-- [ ] Rodar a ferramenta do rastro no Unity e testar
+- [x] Rastro do míssil e nome novo testados no Unity
 - [x] Nome do jogo: **Space Defense** (título do menu e Product Name)
 - [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
