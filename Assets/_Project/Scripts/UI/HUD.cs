@@ -86,6 +86,13 @@ namespace NebulaGuard
             if (endMenuButton != null)
                 endMenuButton.onClick.AddListener(BackToMenu);
 
+            // Som de clique em todos os botões da tela.
+            foreach (Button button in new[] { restartButton, resumeButton, pauseMenuButton, endMenuButton })
+            {
+                if (button != null)
+                    button.onClick.AddListener(AudioManager.PlayClick);
+            }
+
             pausePanel.SetActive(false);
             endPanel.SetActive(false);
             countdownText.gameObject.SetActive(false);

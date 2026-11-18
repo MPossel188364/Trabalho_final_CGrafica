@@ -51,6 +51,9 @@ namespace NebulaGuard
 
         [SerializeField] private TargetingMode targeting = TargetingMode.First;
 
+        [Tooltip("Som do disparo. Laser = Caça (padrão), Missile = Bombardeiro, Railgun = Cruzador.")]
+        [SerializeField] private Sfx fireSound = Sfx.Laser;
+
         [Tooltip("Prefab do projétil (precisa ter o componente Projectile).")]
         [SerializeField] private Projectile projectilePrefab;
 
@@ -63,6 +66,7 @@ namespace NebulaGuard
         public float ProjectileSpeed => projectileSpeed;
         public float TurnSpeed => turnSpeed;
         public TargetingMode Targeting => targeting;
+        public Sfx FireSound => fireSound;
         public Projectile ProjectilePrefab => projectilePrefab;
     }
 }

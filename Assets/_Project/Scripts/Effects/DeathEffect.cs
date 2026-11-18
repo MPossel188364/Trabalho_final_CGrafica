@@ -42,6 +42,7 @@ namespace NebulaGuard
         private void OnDied(Enemy dead)
         {
             EffectSpawner.Play(explosionPrefab, dead.transform.position, size);
+            AudioManager.Play(Sfx.Explosion);
         }
 
         private void OnReachedBase(Enemy crashed)

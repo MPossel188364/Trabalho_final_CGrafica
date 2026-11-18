@@ -90,6 +90,7 @@ namespace NebulaGuard
 
             float effectSize = splashRadius > 0f ? splashRadius : impactEffectSize;
             EffectSpawner.Play(impactEffectPrefab, transform.position, effectSize);
+            AudioManager.Play(splashRadius > 0f ? Sfx.BigExplosion : Sfx.Impact);
 
             Despawn();
         }

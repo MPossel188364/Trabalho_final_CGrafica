@@ -150,6 +150,7 @@ namespace NebulaGuard
             Transform origin = muzzle != null ? muzzle : transform;
             Projectile shot = Instantiate(data.ProjectilePrefab, origin.position, transform.rotation);
             shot.Launch(target, data.Damage, data.ProjectileSpeed, data.SplashRadius);
+            AudioManager.Play(data.FireSound);
         }
 
         // Chamado ao adicionar o componente: já marca a layer Enemy.
