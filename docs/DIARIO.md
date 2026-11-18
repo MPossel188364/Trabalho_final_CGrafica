@@ -1165,3 +1165,39 @@ do produto. Com o nome novo, o ranking de testes antigo some: começa vazio.
 **Como testar:** rodar **NebulaGuard → Adicionar rastro de fumaça no míssil**, dar Play e construir
 um Bombardeiro: o míssil deixa uma trilha laranja que vira fumaça cinza; quando ele explode, a
 trilha termina de sumir devagar.
+
+## 2026-11-18 — Sons e música (`AudioManager`)
+
+**O que foi feito:**
+- `tools/gerar_sons.py`: gera por síntese (numpy + ffmpeg) 14 efeitos `.wav` e 2 músicas `.ogg` em
+  `Assets/_Project/Audio/Resources/{Sfx,Music}/`, com os `.meta` de GUID fixo. Nada foi baixado:
+  não há direito autoral a creditar. Para mudar um som, edita-se a função dele e roda-se de novo.
+- `Core/AudioManager.cs`: criado sozinho ao abrir o jogo (`RuntimeInitializeOnLoadMethod`), não
+  precisa de objeto na cena e sobrevive à troca de cena. `AudioManager.Play(Sfx.X)` é estático.
+- Pontos de chamada (uma linha cada): tiro (`TowerShip.Fire`, som vem do `TowerData.FireSound`),
+  impacto/explosão do míssil (`Projectile`), inimigo destruído (`DeathEffect`), inimigo saindo do
+  portal (`WaveSpawner.Spawn`), compra e venda (`BuildController`), clique (`MainMenu`, `HUD`).
+- Escutados dentro do próprio `AudioManager`: vida da nave-mãe (pancada na base e **alarme em loop**
+  com vida ≤ 30%), `GameManager.StateChanged` (vitória, derrota, música abaixa na pausa).
+- Música: `menu.ogg` na cena MainMenu e `jogo.ogg` nas demais; reiniciar a partida não corta a música.
+- `TowerData.fireSound` (Caça = Laser, Bombardeiro = Missile, Cruzador = Railgun nos assets).
+
+**Por quê assim:**
+- **`Resources.Load` e criação por código:** nenhuma referência para arrastar nem cena para editar,
+  então não há como quebrar a cena que está funcionando, e o grupo não precisa de passo manual.
+- **Quem dispara só pede o som** (`Play(Sfx.X)`); volume, variação de tom e limites ficam num lugar só.
+- **Pool de 12 AudioSources:** vários tiros ao mesmo tempo sem criar/destruir objeto.
+- **Variação de tom (±) e intervalo mínimo de 0,05 s por efeito:** tiro repetido não soa igual, e
+  dez mortes no mesmo frame não estouram o volume.
+- **`Time.unscaledTime`:** com `timeScale = 0` (pausa/fim) o som ainda precisa tocar.
+- **Ignora o preenchimento inicial da vida** (mesmo critério do `CameraShake`): sem isso tocaria
+  "base atingida" ao começar a partida.
+- **Loop com emenda:** a sobra do fim da música é somada ao início; o alarme termina em silêncio.
+
+**Como testar (Unity):** abrir o MainMenu: toca a música calma; botões fazem "clique". Jogar: música
+mais tensa; cada nave tem tiro próprio; impacto/explosão ao destruir; som no portal a cada inimigo;
+compra e venda; deixar a nave-mãe com 30% da vida ou menos: alarme; Esc: música abaixa; fim da
+partida: som de vitória ou derrota. Volumes: Inspector do objeto `AudioManager` (aparece no Play),
+ou as tabelas no topo do `AudioManager.cs`.
+
+**Limite:** escrito sem abrir o Unity e sem ouvir os sons; falta testar e ajustar volume/tom de ouvido.

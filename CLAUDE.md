@@ -62,7 +62,7 @@ Assets/_Project/
 ```
 
 Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não importa
-(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, `gerar_particula.py` e
+(ex.: `gerar_sons.py` (sons e músicas), `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, `gerar_particula.py` e
 `gerar_portal.py`, que desenham o `Art/Effects/Particle.png` e o `PortalSwirl.png`).
 
 ## Padrões de código
@@ -174,6 +174,10 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
   (não usar `Destroy(gameObject, tempo)` no projétil).
 - **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
   eventos da `MotherShip`.
+- **Som:** quem precisa de som chama `AudioManager.Play(Sfx.X)` (estático, não faz nada sem o
+  AudioManager). Som novo = arquivo em `Audio/Resources/Sfx/` + valor **no fim** do enum `Sfx` + nome e
+  volume nas tabelas do `AudioManager`. Os arquivos vêm do `tools/gerar_sons.py` (rodar de novo
+  regera tudo). O AudioManager é criado por código e escuta a nave-mãe e o `GameManager` sozinho.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
   (`Died`, `ReachedBase`); quem reage (créditos, pontos, HUD) assina o evento.
 - Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
@@ -328,6 +332,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   **NebulaGuard → Adicionar rastro de fumaça no míssil**
 - [x] Rastro do míssil e nome novo testados no Unity
 - [x] Nome do jogo: **Space Defense** (título do menu e Product Name)
-- [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
+- [x] **Sons e música — código pronto, falta testar no Unity:** `Core/AudioManager.cs` (nasce sozinho),
+  14 efeitos e 2 músicas em `Audio/Resources/` gerados por `tools/gerar_sons.py`, `TowerData.fireSound`
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README
