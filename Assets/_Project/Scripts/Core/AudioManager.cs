@@ -115,12 +115,22 @@ namespace NebulaGuard
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void BootstrapAfterScene()
         {
-            if (instance == null)
-            {
-                Bootstrap();
-                // A cena já carregou sem ele: liga as ligações da cena atual agora.
-                instance.OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-            }
+            EnsureExists();
+        }
+
+        /// <summary>
+        /// Garante que o AudioManager existe. Os scripts que abrem uma cena (MainMenu, GameManager) e o
+        /// próprio <c>Play</c> chamam isto: mesmo que a criação automática no início do jogo não tenha
+        /// rodado, o primeiro pedido de som cria o objeto e liga a cena atual.
+        /// </summary>
+        public static void EnsureExists()
+        {
+            if (instance != null)
+                return;
+
+            Bootstrap();
+            // A cena já carregou sem ele: liga as ligações da cena atual (música, vida da base) agora.
+            instance.OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
         }
 
         private static void Bootstrap()
@@ -194,11 +204,11 @@ namespace NebulaGuard
 
         // ---------------------------------------------------------------- API
 
-        /// <summary>Toca um efeito. Sem AudioManager (ex.: cena de teste sem ele pronto), não faz nada.</summary>
+        /// <summary>Toca um efeito. Se o AudioManager ainda não existe, cria.</summary>
         public static void Play(Sfx sound)
         {
-            if (instance != null)
-                instance.PlayInternal(sound);
+            EnsureExists();
+            instance.PlayInternal(sound);
         }
 
         /// <summary>Atalho para ligar num botão: <c>button.onClick.AddListener(AudioManager.PlayClick)</c>.</summary>

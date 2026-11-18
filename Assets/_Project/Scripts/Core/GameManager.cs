@@ -50,6 +50,7 @@ namespace NebulaGuard
 
         private void Awake()
         {
+            AudioManager.EnsureExists();
             // Se a cena foi recarregada depois de um fim de partida, o tempo estava parado.
             Time.timeScale = 1f;
 

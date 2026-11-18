@@ -58,6 +58,7 @@ namespace NebulaGuard
 
         private void Awake()
         {
+            AudioManager.EnsureExists();
             // Se o jogador chegou aqui pelo "Menu principal" da pausa, o tempo estava parado.
             Time.timeScale = 1f;
 

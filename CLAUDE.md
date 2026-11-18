@@ -174,8 +174,8 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
   (não usar `Destroy(gameObject, tempo)` no projétil).
 - **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
   eventos da `MotherShip`.
-- **Som:** quem precisa de som chama `AudioManager.Play(Sfx.X)` (estático, não faz nada sem o
-  AudioManager). Som novo = arquivo em `Audio/Resources/Sfx/` + valor **no fim** do enum `Sfx` + nome e
+- **Som:** quem precisa de som chama `AudioManager.Play(Sfx.X)` (estático; cria o AudioManager se ele
+  ainda não existir). Som novo = arquivo em `Audio/Resources/Sfx/` + valor **no fim** do enum `Sfx` + nome e
   volume nas tabelas do `AudioManager`. Os arquivos vêm do `tools/gerar_sons.py` (rodar de novo
   regera tudo). O AudioManager é criado por código e escuta a nave-mãe e o `GameManager` sozinho.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
