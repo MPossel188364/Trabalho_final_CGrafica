@@ -190,12 +190,12 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 Ponte de luz principal (Fácil), objeto `LightBridge_A` com estes waypoints filhos,
 em ordem (o `LightBridge` usa a ordem da Hierarchy, não o nome). As quinas viram curvas
 (`Corner Radius` = 1,5), então os inimigos passam perto dos waypoints do meio, mas não por
-cima deles. Comprimento total com as curvas: **≈ 55 unidades** (o requisito de 30 inimigos
+cima deles. Comprimento total com as curvas: **≈ 57 unidades** (o requisito de 30 inimigos
 enfileirados pede 18).
 
 | Waypoint | Posição (x, y) | Observação |
 | --- | --- | --- |
-| wp_00 | (-14, 4.5) | saída do portal |
+| wp_00 | (-13.4, 4.5) | borda do portal (o redemoinho tem raio ≈ 0,9; a linha não passa por cima dele) |
 | wp_01 | (-9, 4.5) | |
 | wp_02 | (-9, -5) | |
 | wp_03 | (-3, -5) | |
@@ -204,7 +204,7 @@ enfileirados pede 18).
 | wp_06 | (3, -5) | |
 | wp_07 | (9, -5) | |
 | wp_08 | (9, 0) | |
-| wp_09 | (12, 0) | entrada da nave-mãe (x ≈ 13,5) |
+| wp_09 | (13.8, 0) | centro da nave-mãe: o inimigo entra no casco antes de bater |
 
 Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 
@@ -214,9 +214,9 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1, **Target Sorting Layers = All** |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
 | Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Unlit-Default | redemoinho: miolo escuro + filhos `Swirl_Outer`, `Swirl_Inner`, `Sparks` e `PortalVortex` (**NebulaGuard → Trocar visual dos portais**) |
-| LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-14, 0) → (12, 0), reta. Criada por **Adicionar ponte do Difícil** |
+| LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-13.4, 0) → (13.8, 0), reta. Criada por **Adicionar ponte do Difícil** |
 | Portal_B | (-14.8, 0) | 1.8 | Ships | Sprite-Lit-Default | **só no Difícil**; cópia do Portal_A, em `Second Bridge Objects` do `WaveSpawner` |
-| Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
+| Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger pequeno no centro (Size 0,4 × 0,4, Offset 0; 1,2 × 1,2 no mundo) |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,5, que cobre a nave posicionada) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |

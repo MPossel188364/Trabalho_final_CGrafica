@@ -1093,3 +1093,31 @@ explodir; (2) o portal (disco voador vermelho da Kenney) parecia uma mini nave-m
 **Como testar:** rodar **NebulaGuard → Trocar visual dos portais** e dar Play: o portal é um
 redemoinho roxo girando e pulsando, com faíscas; no Difícil, os dois portais. Deixar um inimigo
 chegar à nave-mãe: explode e a câmera treme.
+
+## 2026-11-18 — Pontas das pontes: saindo do portal e entrando na nave-mãe
+
+Pedido depois do teste do portal novo: a ponte começava por cima do portal, e os inimigos
+explodiam antes de encostar na nave-mãe.
+
+**O que foi feito (cena Game):**
+- Início das pontes (`wp_00` da A e da B): x -14 → **-13,4**.
+- Fim das pontes (`wp_09` da A e `wp_01` da B): (12, 0) → **(13,8; 0)**, o centro da nave-mãe.
+- Trigger da `Mothership`: Size 1 × 1 com Offset X -0,5 → **Size 0,4 × 0,4 com Offset 0**.
+- `HardModeSetup`: os pontos da ponte B seguem os valores novos (se alguém recriar a ponte).
+
+**Por quê esses números:**
+- **Portal:** o redemoinho tem raio ≈ 0,9 (imagem de 2,56 × escala 0,48 × escala do portal 1,5 ÷ 2),
+  então vai até x ≈ -13,9. A linha tem ponta arredondada que passa 0,4 (meia largura) do
+  primeiro waypoint; com o waypoint em -13,4 a linha nasce na borda do portal.
+- **Nave-mãe:** o collider é multiplicado pela escala do objeto (3). A caixa antiga ficava com
+  3 × 3 no mundo e deslocada 1,5 para trás: cobria x de 10,8 a 13,8, e o casco só começa em
+  ≈ 12,4 (a imagem tem 0,91 × 3 = 2,7 de largura). O inimigo sumia ~1,5 antes de encostar.
+  A caixa nova tem 1,2 × 1,2 no centro (13,2 a 14,4); somando o raio do collider do inimigo,
+  ele bate por volta de x ≈ 12,9, já dentro do casco, e a explosão aparece em cima da nave.
+- **O último waypoint precisa ficar dentro do trigger:** senão o inimigo chega ao fim da ponte
+  sem tocar a nave-mãe (o `Enemy` avisa no Console).
+- A ponte agora passa por baixo da nave-mãe; não aparece porque a Sorting Layer `Bridges` fica
+  atrás de `Ships`.
+
+**Como testar:** Play; a linha nasce na borda do portal; o inimigo que chega à nave-mãe entra
+no casco e explode em cima dela. No Difícil, o mesmo nas duas pontes.
