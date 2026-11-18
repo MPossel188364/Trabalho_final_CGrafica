@@ -1009,3 +1009,159 @@ Ranking e Sobre. **Escrever os nomes do grupo** no `About Text` do objeto `MainM
 
 **Como testar:** Play na cena MainMenu → Difícil: começa com 150 créditos. Construir as três naves
 e ver que cabem nos corredores; clicar na ponta da asa abre o "Vender".
+
+## 2026-11-18 — Efeitos, parte 1: explosões e tremida da câmera (código)
+
+**O que foi feito:**
+- `Art/Effects/Particle.png`: disco branco de borda suave, desenhado por `tools/gerar_particula.py`
+  (mesmo jeito do ícone da moeda). É a "bolinha" de cada partícula.
+- `Effects/EffectSpawner.cs`: toca um prefab de partículas num ponto, com um tamanho.
+- `Effects/DeathEffect.cs`: vai no prefab do inimigo, escuta o `Died` dele e toca a explosão.
+- `Projectile.cs`: campos opcionais `Impact Effect Prefab` e `Impact Effect Size`. Ao acertar,
+  toca o efeito; se o tiro tem raio de explosão (míssil do Bombardeiro), o tamanho é o raio.
+- `Effects/CameraShake.cs`: na Main Camera, escuta a `MotherShip` e treme quando ela perde vida
+  (mais forte quanto maior o dano) e bem forte quando é destruída.
+- `Editor/EffectsSetup.cs`: menu **NebulaGuard → Adicionar explosões e tremida**. Cria o prefab
+  `Prefabs/Effects/Explosao` (Particle System), liga nos 3 inimigos e nos 3 projéteis e põe o
+  `CameraShake` na câmera da cena Game.
+
+**Por quê assim:**
+- **Particle System** (o sistema de partículas do Unity) em vez de animação de sprite: cada
+  explosão sai diferente (velocidade, tamanho e cor sorteados em faixas), e é um tema da disciplina.
+  A explosão tem duas partes: um **clarão** (uma partícula grande e branca que some em 0,15 s) e
+  **24 faíscas** que saem em círculo, são freadas pelo **arrasto** (abrem rápido e param), vão de
+  amarelo a vermelho escuro (**Color over Lifetime**) e encolhem (**Size over Lifetime**).
+- **Bloom de graça:** começam claras (acima do Threshold 0,6, brilham) e terminam escuras (param
+  de brilhar). Material `Sprite-Unlit-Default`, como tudo que brilha sozinho.
+- **O desenho vem do módulo Texture Sheet Animation (modo Sprites):** assim não foi preciso criar
+  um material novo só para a textura da partícula.
+- **Scaling Mode = Hierarchy:** o Particle System segue a escala do objeto, então um único prefab
+  serve para todos os tamanhos (Drone 0,7, Couraçado 1,5, impacto do laser 0,25). No míssil, o
+  tamanho é o raio de dano: o jogador **vê** a área que levou dano.
+- **Stop Action = Destroy:** o objeto da explosão se apaga sozinho quando a última faísca morre;
+  ninguém precisa lembrar de destruí-lo.
+- **`DeathEffect` separado do `Enemy`:** o `Enemy` só avisa que morreu (`Died`); quem quer reagir
+  assina o evento. Mesmo padrão do `GameSession` (créditos) e do `WaveSpawner`.
+- **Tremida por "trauma":** cada pancada soma trauma (0 a 1), que cai sozinho; o deslocamento é
+  trauma², então pancada pequena mal mexe e o fim é suave. A direção vem do **ruído de Perlin**
+  (um aleatório contínuo): a câmera balança em vez de pular de ponto em ponto. Roda no
+  `LateUpdate` (depois de tudo) e com `Time.unscaledDeltaTime`, para a tremida da derrota
+  acontecer mesmo com o jogo parado (`timeScale = 0`).
+- **Ferramenta de editor:** configurar um Particle System são ~30 campos; a ferramenta deixa
+  tudo igual nos três PCs. Como as outras, só acrescenta: prefab que já existe não é recriado,
+  então ajustes feitos à mão no Inspector ficam.
+
+**Como testar:** abrir o Unity, rodar **NebulaGuard → Adicionar explosões e tremida** e dar Play
+na cena MainMenu → Fácil. Inimigo destruído explode (o Couraçado, maior); o míssil do
+Bombardeiro explode do tamanho da área; laser e raio soltam uma faísca pequena ao acertar;
+inimigo que chega à nave-mãe faz a câmera tremer; na derrota, tremida forte.
+
+## 2026-11-18 — Efeitos, parte 1b: explosão na nave-mãe e portal novo
+
+Pedidos depois do teste das explosões: (1) o inimigo que bate na nave-mãe também deveria
+explodir; (2) o portal (disco voador vermelho da Kenney) parecia uma mini nave-mãe.
+
+**O que foi feito:**
+- `DeathEffect`: também escuta o `ReachedBase` e toca a explosão na batida, 30% maior
+  (`Impact Size Multiplier`, 0 desliga). Não precisa rodar ferramenta: os prefabs pegam o valor
+  padrão sozinhos.
+- `Art/Effects/PortalSwirl.png`: redemoinho de 4 braços em espiral, desenhado por
+  `tools/gerar_portal.py`.
+- `Effects/PortalVortex.cs`: gira cada camada do portal na sua velocidade e as faz pulsar.
+- `Editor/PortalSetup.cs`: menu **NebulaGuard → Trocar visual dos portais**. Em cada `Portal_...`
+  da cena Game: o sprite do próprio portal vira um miolo escuro (o "buraco"), ganha os filhos
+  `Swirl_Outer` (roxo, gira a 50°/s), `Swirl_Inner` (rosa, menor, 130°/s) e `Sparks` (faíscas
+  saindo do centro em espiral), e o `PortalVortex`.
+- `EffectsSetup`: os auxiliares (importar sprite, achar o material, aparência da partícula)
+  passaram a ser compartilhados com o `PortalSetup`.
+
+**Por quê assim:**
+- **A espiral é uma fórmula:** um ponto está num braço quando `cos(4 · (ângulo + torção · raio))`
+  é perto de 1. Somar o raio ao ângulo é o que enrola o braço. A primeira versão tinha torção
+  demais e parecia anéis concêntricos; com 0,45 volta do centro à borda virou redemoinho.
+- **Imagem branca, cor no Sprite Renderer:** a mesma imagem serve para as duas camadas.
+- **Duas camadas em velocidades diferentes** dão profundidade (a de dentro mais rápida), o mesmo
+  truque do parallax do fundo. Girar no sentido anti-horário faz os braços parecerem sair do
+  centro: o portal "cospe" os inimigos.
+- **Roxo e rosa:** claros o bastante para o Bloom e diferentes do ciano do jogador (ponte e naves):
+  o portal fica com cara de coisa inimiga.
+- **Faíscas com Velocity over Lifetime:** `Radial` afasta do centro e `Orbital Z` gira em volta
+  dele; juntas fazem a espiral, sem script.
+- **Mesmos objetos `Portal_A`/`Portal_B`:** o `WaveSpawner` liga e desliga o `Portal_B` conforme a
+  dificuldade; trocar só o visual não mexe nisso.
+
+**Como testar:** rodar **NebulaGuard → Trocar visual dos portais** e dar Play: o portal é um
+redemoinho roxo girando e pulsando, com faíscas; no Difícil, os dois portais. Deixar um inimigo
+chegar à nave-mãe: explode e a câmera treme.
+
+## 2026-11-18 — Pontas das pontes: saindo do portal e entrando na nave-mãe
+
+Pedido depois do teste do portal novo: a ponte começava por cima do portal, e os inimigos
+explodiam antes de encostar na nave-mãe.
+
+**O que foi feito (cena Game):**
+- Início das pontes (`wp_00` da A e da B): x -14 → **-13,4**.
+- Fim das pontes (`wp_09` da A e `wp_01` da B): (12, 0) → **(13,8; 0)**, o centro da nave-mãe.
+- Trigger da `Mothership`: Size 1 × 1 com Offset X -0,5 → **Size 0,4 × 0,4 com Offset 0**.
+- `HardModeSetup`: os pontos da ponte B seguem os valores novos (se alguém recriar a ponte).
+
+**Por quê esses números:**
+- **Portal:** o redemoinho tem raio ≈ 0,9 (imagem de 2,56 × escala 0,48 × escala do portal 1,5 ÷ 2),
+  então vai até x ≈ -13,9. A linha tem ponta arredondada que passa 0,4 (meia largura) do
+  primeiro waypoint; com o waypoint em -13,4 a linha nasce na borda do portal.
+- **Nave-mãe:** o collider é multiplicado pela escala do objeto (3). A caixa antiga ficava com
+  3 × 3 no mundo e deslocada 1,5 para trás: cobria x de 10,8 a 13,8, e o casco só começa em
+  ≈ 12,4 (a imagem tem 0,91 × 3 = 2,7 de largura). O inimigo sumia ~1,5 antes de encostar.
+  A caixa nova tem 1,2 × 1,2 no centro (13,2 a 14,4); somando o raio do collider do inimigo,
+  ele bate por volta de x ≈ 12,9, já dentro do casco, e a explosão aparece em cima da nave.
+- **O último waypoint precisa ficar dentro do trigger:** senão o inimigo chega ao fim da ponte
+  sem tocar a nave-mãe (o `Enemy` avisa no Console).
+- A ponte agora passa por baixo da nave-mãe; não aparece porque a Sorting Layer `Bridges` fica
+  atrás de `Ships`.
+
+**Como testar:** Play; a linha nasce na borda do portal; o inimigo que chega à nave-mãe entra
+no casco e explode em cima dela. No Difícil, o mesmo nas duas pontes.
+
+## 2026-11-18 — Nome do jogo: Space Defense
+
+**O que foi feito:** o jogo passou a se chamar **Space Defense** (era *Nebula Guard*).
+- Título do menu principal (`MainMenu.cs`): "SPACE DEFENSE".
+- `ProjectSettings` → **Product Name** = `Space Defense`: é o nome do `.exe`, o título da janela
+  e o nome que aparece no build.
+- Títulos do `README.md` e do `CLAUDE.md`.
+
+**O que ficou com o nome antigo, de propósito:** o namespace `NebulaGuard` dos scripts, o menu
+**NebulaGuard → …** das ferramentas, o menu *Create → NebulaGuard* dos ScriptableObjects e a
+chave do ranking (`NebulaGuard.Ranking`). O jogador não vê nada disso, e renomear mexeria em
+todos os scripts ao mesmo tempo em que os colegas trabalham neles (conflito de merge certo), sem
+ganho visível.
+
+**Efeito colateral:** o Unity guarda o PlayerPrefs (onde fica o ranking) numa pasta com o nome
+do produto. Com o nome novo, o ranking de testes antigo some: começa vazio.
+
+## 2026-11-18 — Efeitos, parte 2: rastro de fumaça do míssil
+
+**O que foi feito:**
+- `Projectile.cs`: campo opcional `Trail` (um Particle System filho). Antes de o projétil ser
+  apagado (acertou ou o tempo acabou), o rastro é **solto** (vira objeto sem pai) e para de
+  emitir. O tempo de vida passou a ser contado no `Update`, para os dois casos passarem pelo
+  mesmo `Despawn`.
+- `Editor/EffectsSetup.cs`: novo menu **NebulaGuard → Adicionar rastro de fumaça no míssil**, que
+  cria o filho `Fumaca` na cauda do `Missil_Bombardeiro` e liga no campo `Trail`.
+
+**Por quê assim:**
+- **Espaço World:** cada nuvem fica onde nasceu e o míssil segue em frente; é isso que desenha a
+  trilha. Em espaço Local a fumaça andaria grudada no míssil.
+- **Rate over Distance** (nuvens por unidade andada) em vez de por segundo: a trilha fica
+  contínua, sem buracos, em qualquer velocidade.
+- **Cor:** nasce laranja (fogo do motor, acima do Threshold, brilha com o Bloom), esfria para
+  cinza escuro (sem brilho), cresce e some.
+- **Soltar antes de apagar:** filho é destruído junto com o pai. Sem soltar, toda a fumaça
+  sumiria de uma vez quando o míssil explodisse. Solta, ela termina de se desfazer e o
+  `Stop Action = Destroy` apaga o objeto no fim.
+- **Por que não `Destroy(gameObject, lifetime)`:** ele apaga o objeto direto, sem passar pelo
+  código que solta o rastro.
+
+**Como testar:** rodar **NebulaGuard → Adicionar rastro de fumaça no míssil**, dar Play e construir
+um Bombardeiro: o míssil deixa uma trilha laranja que vira fumaça cinza; quando ele explode, a
+trilha termina de sumir devagar.

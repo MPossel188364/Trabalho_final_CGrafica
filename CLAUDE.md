@@ -1,4 +1,7 @@
-# Nebula Guard — contexto para IA
+# Space Defense — contexto para IA
+
+**Nome do jogo: Space Defense** (até 18/11 era *Nebula Guard*; o nome antigo ficou só por
+dentro: namespace `NebulaGuard`, menu **NebulaGuard → …** das ferramentas e a chave do ranking).
 
 Tower defense 2D no espaço, feito em Unity para a disciplina CCC300 (UPF, 2026/2),
 em trio. Entrega e apresentação em **24/11/2026**.
@@ -48,18 +51,19 @@ Assets/_Project/
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
     UI/        HUD, MainMenu, BuildMenuUI
-    Effects/   CameraShake, ParallaxLayer
-    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup (só existem no editor, não entram no build)
+    Effects/   CameraShake, ParallaxLayer, DeathEffect, EffectSpawner, PortalVortex
+    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup, EffectsSetup, PortalSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
-  Prefabs/     naves, inimigos, projéteis, efeitos
+  Prefabs/     naves, inimigos, projéteis; Effects/ (Explosao)
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
-  Art/         sprites (Towers, Enemies, Projectiles, Base), UI (botões e ícones), Fonts
+  Art/         sprites (Towers, Enemies, Projectiles, Base, Effects), UI (botões e ícones), Fonts
   Audio/       música e efeitos
   Materials/   pontes de luz, partículas
 ```
 
 Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não importa
-(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`).
+(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, `gerar_particula.py` e
+`gerar_portal.py`, que desenham o `Art/Effects/Particle.png` e o `PortalSwirl.png`).
 
 ## Padrões de código
 
@@ -159,6 +163,17 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 - `[ExecuteAlways]` só em componentes que precisam se atualizar no editor (ex.:
   a ponte de luz redesenhando ao arrastar waypoints), sempre separando o que roda
   só no editor com `if (!Application.isPlaying)`.
+- **Efeitos de partículas:** um prefab só (`Prefabs/Effects/Explosao`), tocado por
+  `EffectSpawner.Play(prefab, posição, tamanho)`. O Particle System usa **Scaling Mode =
+  Hierarchy** (o tamanho é a escala do objeto), **Stop Action = Destroy** (some sozinho),
+  material `Sprite-Unlit-Default`, Sorting Layer `Effects` e o desenho da partícula no módulo
+  **Texture Sheet Animation** (modo Sprites). Efeito de morte = componente `DeathEffect` no
+  prefab do inimigo (escuta o `Died` e o `ReachedBase`); de impacto = campo `Impact Effect Prefab` do `Projectile`.
+- **Rastro de projétil:** Particle System filho em espaço **World**, ligado no campo `Trail` do
+  `Projectile`. O projétil some sempre pelo `Despawn`, que solta o rastro antes de se apagar
+  (não usar `Destroy(gameObject, tempo)` no projétil).
+- **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
+  eventos da `MotherShip`.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
   (`Died`, `ReachedBase`); quem reage (créditos, pontos, HUD) assina o evento.
 - Triggers reconhecem o outro objeto pelo **componente** (`TryGetComponent<Enemy>`),
@@ -181,12 +196,12 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 Ponte de luz principal (Fácil), objeto `LightBridge_A` com estes waypoints filhos,
 em ordem (o `LightBridge` usa a ordem da Hierarchy, não o nome). As quinas viram curvas
 (`Corner Radius` = 1,5), então os inimigos passam perto dos waypoints do meio, mas não por
-cima deles. Comprimento total com as curvas: **≈ 55 unidades** (o requisito de 30 inimigos
+cima deles. Comprimento total com as curvas: **≈ 57 unidades** (o requisito de 30 inimigos
 enfileirados pede 18).
 
 | Waypoint | Posição (x, y) | Observação |
 | --- | --- | --- |
-| wp_00 | (-14, 4.5) | saída do portal |
+| wp_00 | (-13.4, 4.5) | borda do portal (o redemoinho tem raio ≈ 0,9; a linha não passa por cima dele) |
 | wp_01 | (-9, 4.5) | |
 | wp_02 | (-9, -5) | |
 | wp_03 | (-3, -5) | |
@@ -195,7 +210,7 @@ enfileirados pede 18).
 | wp_06 | (3, -5) | |
 | wp_07 | (9, -5) | |
 | wp_08 | (9, 0) | |
-| wp_09 | (12, 0) | entrada da nave-mãe (x ≈ 13,5) |
+| wp_09 | (13.8, 0) | centro da nave-mãe: o inimigo entra no casco antes de bater |
 
 Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 
@@ -204,10 +219,10 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A`, Post Processing ligado |
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1, **Target Sorting Layers = All** |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
-| Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Lit-Default | sprite `Art/Base/Portal` (Kenney) |
-| LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-14, 0) → (12, 0), reta. Criada por **Adicionar ponte do Difícil** |
+| Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Unlit-Default | redemoinho: miolo escuro + filhos `Swirl_Outer`, `Swirl_Inner`, `Sparks` e `PortalVortex` (**NebulaGuard → Trocar visual dos portais**) |
+| LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-13.4, 0) → (13.8, 0), reta. Criada por **Adicionar ponte do Difícil** |
 | Portal_B | (-14.8, 0) | 1.8 | Ships | Sprite-Lit-Default | **só no Difícil**; cópia do Portal_A, em `Second Bridge Objects` do `WaveSpawner` |
-| Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
+| Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger pequeno no centro (Size 0,4 × 0,4, Offset 0; 1,2 × 1,2 no mundo) |
 | BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,5, que cobre a nave posicionada) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
@@ -301,7 +316,18 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   collider do `BuildSlot` com raio 0,5
 - [ ] **Falta no Difícil:** continuar o balanceamento (vida da nave-mãe, tamanho das ondas) e
   atualizar a tabela de dificuldades do plano
-- [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
-  e o rastro de fumaça do míssil do Bombardeiro)
+- [x] **Explosões e tremida — código pronto:** `Effects/DeathEffect.cs`, `EffectSpawner.cs`,
+  `CameraShake.cs`, efeito de impacto no `Projectile` e a ferramenta `Editor/EffectsSetup.cs`
+  (**NebulaGuard → Adicionar explosões e tremida**)
+- [x] Explosões e tremida testadas no Unity
+- [x] Explosão também quando o inimigo bate na nave-mãe (`DeathEffect` escuta o `ReachedBase`)
+- [x] **Portal novo — código pronto:** redemoinho animado (`PortalVortex`, `Art/Effects/PortalSwirl.png`)
+  e a ferramenta `Editor/PortalSetup.cs` (**NebulaGuard → Trocar visual dos portais**)
+- [x] Portal novo e pontas das pontes (início na borda do portal, fim no centro da nave-mãe) testados no Unity
+- [x] **Rastro de fumaça do míssil — código pronto:** campo `Trail` no `Projectile` e o menu
+  **NebulaGuard → Adicionar rastro de fumaça no míssil**
+- [x] Rastro do míssil e nome novo testados no Unity
+- [x] Nome do jogo: **Space Defense** (título do menu e Product Name)
+- [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
 - [ ] Build Windows, vídeo demonstrativo e links no README

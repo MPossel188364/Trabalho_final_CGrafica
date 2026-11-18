@@ -19,3 +19,6 @@ UI/IconCredits.png       <- desenhado por nós (tools/gerar_icone_moeda.py), nã
 UI/IconScore.png         <- PNG/Power-ups/star_gold.png
 UI/IconWave.png          <- PNG/UI/playerLife1_red.png
 Fonts/kenvector_future.ttf, kenvector_future_thin.ttf <- Bonus/ (mesma licença CC0)
+Effects/Particle.png     <- desenhado por nós (tools/gerar_particula.py), não é da Kenney
+Effects/PortalSwirl.png  <- desenhado por nós (tools/gerar_portal.py), não é da Kenney
+Base/Portal.png          <- não é mais usado no portal desde 18/11 (virou redemoinho)

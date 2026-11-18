@@ -26,11 +26,12 @@ namespace NebulaGuard.EditorTools
         private const string HardDataPath = "Assets/_Project/Data/Dificil.asset";
 
         // Reta em y = 0: passa entre as duas fileiras de slots (y = ±2), dentro do alcance
-        // de todas as naves, e termina no mesmo ponto da ponte A (entrada da nave-mãe).
+        // de todas as naves, e termina no mesmo ponto da ponte A (o centro da nave-mãe).
+        // Começa na borda do portal (x = -13,4), não no centro, para a linha não aparecer por cima dele.
         private static readonly Vector2[] BridgeBPoints =
         {
-            new Vector2(-14f, 0f),
-            new Vector2(12f, 0f),
+            new Vector2(-13.4f, 0f),
+            new Vector2(13.8f, 0f),
         };
 
         private static readonly Vector2 PortalBPosition = new Vector2(-14.8f, 0f);

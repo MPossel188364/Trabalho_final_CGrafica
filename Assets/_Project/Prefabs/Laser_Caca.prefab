@@ -171,3 +171,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.Projectile
   lifetime: 2
   spriteAngleOffset: -90
+  impactEffectPrefab: {fileID: 6190309450643332728, guid: c1ae36a53ca5444e2a3c0afea20def21, type: 3}
+  impactEffectSize: 0.25
