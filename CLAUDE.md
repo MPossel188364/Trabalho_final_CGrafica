@@ -48,8 +48,8 @@ Assets/_Project/
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
     UI/        HUD, MainMenu, BuildMenuUI
-    Effects/   CameraShake, ParallaxLayer, DeathEffect, EffectSpawner
-    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup, EffectsSetup (só existem no editor, não entram no build)
+    Effects/   CameraShake, ParallaxLayer, DeathEffect, EffectSpawner, PortalVortex
+    Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup, EffectsSetup, PortalSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
   Prefabs/     naves, inimigos, projéteis; Effects/ (Explosao)
   Scenes/      MainMenu, Game, Sandbox/ (cena de teste de cada um)
@@ -59,8 +59,8 @@ Assets/_Project/
 ```
 
 Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não importa
-(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, e `gerar_particula.py`,
-que desenha o `Art/Effects/Particle.png`).
+(ex.: `gerar_icone_moeda.py`, que desenha o `Art/UI/IconCredits.png`, `gerar_particula.py` e
+`gerar_portal.py`, que desenham o `Art/Effects/Particle.png` e o `PortalSwirl.png`).
 
 ## Padrões de código
 
@@ -165,7 +165,7 @@ que desenha o `Art/Effects/Particle.png`).
   Hierarchy** (o tamanho é a escala do objeto), **Stop Action = Destroy** (some sozinho),
   material `Sprite-Unlit-Default`, Sorting Layer `Effects` e o desenho da partícula no módulo
   **Texture Sheet Animation** (modo Sprites). Efeito de morte = componente `DeathEffect` no
-  prefab do inimigo (escuta o `Died`); de impacto = campo `Impact Effect Prefab` do `Projectile`.
+  prefab do inimigo (escuta o `Died` e o `ReachedBase`); de impacto = campo `Impact Effect Prefab` do `Projectile`.
 - **Tremida de tela:** `CameraShake.AddTrauma(0..1)` na Main Camera; hoje é chamada pelos
   eventos da `MotherShip`.
 - Inimigos e projéteis avisam o resto do jogo por **eventos de instância**
@@ -213,7 +213,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | Main Camera | (0, 0, -10) | — | — | — | ortográfica, size 9, fundo `0B0E1A`, Post Processing ligado |
 | Global Light 2D | (0, 0) | — | — | — | do template, intensidade 1, **Target Sorting Layers = All** |
 | LightBridge_A | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | linha ciano `3FE0FF`, largura 0,85, 6 cap vertices; Corner Radius 1,5, Corner Segments 10 |
-| Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Lit-Default | sprite `Art/Base/Portal` (Kenney) |
+| Portal_A | (-14.8, 4.5) | 1.8 | Ships | Sprite-Unlit-Default | redemoinho: miolo escuro + filhos `Swirl_Outer`, `Swirl_Inner`, `Sparks` e `PortalVortex` (**NebulaGuard → Trocar visual dos portais**) |
 | LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-14, 0) → (12, 0), reta. Criada por **Adicionar ponte do Difícil** |
 | Portal_B | (-14.8, 0) | 1.8 | Ships | Sprite-Lit-Default | **só no Difícil**; cópia do Portal_A, em `Second Bridge Objects` do `WaveSpawner` |
 | Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
@@ -313,7 +313,11 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] **Explosões e tremida — código pronto:** `Effects/DeathEffect.cs`, `EffectSpawner.cs`,
   `CameraShake.cs`, efeito de impacto no `Projectile` e a ferramenta `Editor/EffectsSetup.cs`
   (**NebulaGuard → Adicionar explosões e tremida**)
-- [ ] Rodar a ferramenta no Unity e testar as explosões e a tremida
+- [x] Explosões e tremida testadas no Unity
+- [x] Explosão também quando o inimigo bate na nave-mãe (`DeathEffect` escuta o `ReachedBase`)
+- [x] **Portal novo — código pronto:** redemoinho animado (`PortalVortex`, `Art/Effects/PortalSwirl.png`)
+  e a ferramenta `Editor/PortalSetup.cs` (**NebulaGuard → Trocar visual dos portais**)
+- [ ] Rodar a ferramenta dos portais no Unity e testar
 - [ ] Efeitos, parte 2: rastro de fumaça do míssil do Bombardeiro
 - [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual

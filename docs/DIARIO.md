@@ -1055,3 +1055,41 @@ e ver que cabem nos corredores; clicar na ponta da asa abre o "Vender".
 na cena MainMenu → Fácil. Inimigo destruído explode (o Couraçado, maior); o míssil do
 Bombardeiro explode do tamanho da área; laser e raio soltam uma faísca pequena ao acertar;
 inimigo que chega à nave-mãe faz a câmera tremer; na derrota, tremida forte.
+
+## 2026-11-18 — Efeitos, parte 1b: explosão na nave-mãe e portal novo
+
+Pedidos depois do teste das explosões: (1) o inimigo que bate na nave-mãe também deveria
+explodir; (2) o portal (disco voador vermelho da Kenney) parecia uma mini nave-mãe.
+
+**O que foi feito:**
+- `DeathEffect`: também escuta o `ReachedBase` e toca a explosão na batida, 30% maior
+  (`Impact Size Multiplier`, 0 desliga). Não precisa rodar ferramenta: os prefabs pegam o valor
+  padrão sozinhos.
+- `Art/Effects/PortalSwirl.png`: redemoinho de 4 braços em espiral, desenhado por
+  `tools/gerar_portal.py`.
+- `Effects/PortalVortex.cs`: gira cada camada do portal na sua velocidade e as faz pulsar.
+- `Editor/PortalSetup.cs`: menu **NebulaGuard → Trocar visual dos portais**. Em cada `Portal_...`
+  da cena Game: o sprite do próprio portal vira um miolo escuro (o "buraco"), ganha os filhos
+  `Swirl_Outer` (roxo, gira a 50°/s), `Swirl_Inner` (rosa, menor, 130°/s) e `Sparks` (faíscas
+  saindo do centro em espiral), e o `PortalVortex`.
+- `EffectsSetup`: os auxiliares (importar sprite, achar o material, aparência da partícula)
+  passaram a ser compartilhados com o `PortalSetup`.
+
+**Por quê assim:**
+- **A espiral é uma fórmula:** um ponto está num braço quando `cos(4 · (ângulo + torção · raio))`
+  é perto de 1. Somar o raio ao ângulo é o que enrola o braço. A primeira versão tinha torção
+  demais e parecia anéis concêntricos; com 0,45 volta do centro à borda virou redemoinho.
+- **Imagem branca, cor no Sprite Renderer:** a mesma imagem serve para as duas camadas.
+- **Duas camadas em velocidades diferentes** dão profundidade (a de dentro mais rápida), o mesmo
+  truque do parallax do fundo. Girar no sentido anti-horário faz os braços parecerem sair do
+  centro: o portal "cospe" os inimigos.
+- **Roxo e rosa:** claros o bastante para o Bloom e diferentes do ciano do jogador (ponte e naves):
+  o portal fica com cara de coisa inimiga.
+- **Faíscas com Velocity over Lifetime:** `Radial` afasta do centro e `Orbital Z` gira em volta
+  dele; juntas fazem a espiral, sem script.
+- **Mesmos objetos `Portal_A`/`Portal_B`:** o `WaveSpawner` liga e desliga o `Portal_B` conforme a
+  dificuldade; trocar só o visual não mexe nisso.
+
+**Como testar:** rodar **NebulaGuard → Trocar visual dos portais** e dar Play: o portal é um
+redemoinho roxo girando e pulsando, com faíscas; no Difícil, os dois portais. Deixar um inimigo
+chegar à nave-mãe: explode e a câmera treme.

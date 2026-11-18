@@ -20,7 +20,7 @@ namespace NebulaGuard.EditorTools
     public static class EffectsSetup
     {
         private const string GameScenePath = "Assets/_Project/Scenes/Game.unity";
-        private const string ParticleSpritePath = "Assets/_Project/Art/Effects/Particle.png";
+        internal const string ParticleSpritePath = "Assets/_Project/Art/Effects/Particle.png";
         private const string EffectsFolder = "Assets/_Project/Prefabs/Effects";
         private const string ExplosionPath = EffectsFolder + "/Explosao.prefab";
         private const string Prefabs = "Assets/_Project/Prefabs/";
@@ -55,7 +55,7 @@ namespace NebulaGuard.EditorTools
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 return;
 
-            Sprite particle = PrepareParticleSprite();
+            Sprite particle = PrepareSprite(ParticleSpritePath, "gerar_particula.py");
             if (particle == null)
                 return;
 
@@ -90,13 +90,14 @@ namespace NebulaGuard.EditorTools
             Debug.Log("Explosões e tremida prontas. Dê Play: inimigo destruído explode, o míssil explode do tamanho da área de dano e a câmera treme quando um inimigo chega à nave-mãe.");
         }
 
-        // ---------- Sprite da partícula ----------
+        // ---------- Auxiliares (também usados pelo PortalSetup) ----------
 
-        private static Sprite PrepareParticleSprite()
+        /// <summary>Importa um PNG gerado pelos scripts de tools/ como sprite único, a 100 px por unidade.</summary>
+        internal static Sprite PrepareSprite(string path, string generatorScript)
         {
-            if (!(AssetImporter.GetAtPath(ParticleSpritePath) is TextureImporter importer))
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
             {
-                Debug.LogError($"Não achei {ParticleSpritePath}. Gere com: python3 tools/gerar_particula.py {ParticleSpritePath}");
+                Debug.LogError($"Não achei {path}. Gere com: python3 tools/{generatorScript} {path}");
                 return null;
             }
 
@@ -108,7 +109,16 @@ namespace NebulaGuard.EditorTools
                 importer.SaveAndReimport();
             }
 
-            return AssetDatabase.LoadAssetAtPath<Sprite>(ParticleSpritePath);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        internal static Material LoadUnlitMaterial()
+        {
+            string materialPath = AssetDatabase.GUIDToAssetPath(UnlitMaterialGuid);
+            var material = string.IsNullOrEmpty(materialPath) ? null : AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null)
+                Debug.LogError("Não achei o Sprite-Unlit-Default do URP.");
+            return material;
         }
 
         // ---------- Prefab da explosão ----------
@@ -119,13 +129,9 @@ namespace NebulaGuard.EditorTools
             if (existing != null)
                 return existing;
 
-            string materialPath = AssetDatabase.GUIDToAssetPath(UnlitMaterialGuid);
-            var material = string.IsNullOrEmpty(materialPath) ? null : AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            Material material = LoadUnlitMaterial();
             if (material == null)
-            {
-                Debug.LogError("Não achei o Sprite-Unlit-Default do URP; a explosão não foi criada.");
                 return null;
-            }
 
             if (!AssetDatabase.IsValidFolder(EffectsFolder))
                 AssetDatabase.CreateFolder("Assets/_Project/Prefabs", "Effects");
@@ -232,7 +238,7 @@ namespace NebulaGuard.EditorTools
         /// O desenho da partícula vem do módulo Texture Sheet Animation (modo Sprites): assim o
         /// material continua sendo o Sprite-Unlit-Default do URP, sem criar material novo.
         /// </summary>
-        private static void ConfigureLook(ParticleSystem ps, Sprite particle, Material material, int sortingOrder)
+        internal static void ConfigureLook(ParticleSystem ps, Sprite particle, Material material, int sortingOrder, string sortingLayer = "Effects")
         {
             var sheet = ps.textureSheetAnimation;
             sheet.enabled = true;
@@ -242,11 +248,11 @@ namespace NebulaGuard.EditorTools
             var renderer = ps.GetComponent<ParticleSystemRenderer>();
             renderer.sharedMaterial = material;
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-            renderer.sortingLayerName = "Effects";
+            renderer.sortingLayerName = sortingLayer;
             renderer.sortingOrder = sortingOrder;
         }
 
-        private static Gradient Gradient(GradientColorKey[] colors, GradientAlphaKey[] alphas)
+        internal static Gradient Gradient(GradientColorKey[] colors, GradientAlphaKey[] alphas)
         {
             var gradient = new Gradient();
             gradient.SetKeys(colors, alphas);
