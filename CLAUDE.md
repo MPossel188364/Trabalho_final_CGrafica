@@ -317,7 +317,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] Explosão também quando o inimigo bate na nave-mãe (`DeathEffect` escuta o `ReachedBase`)
 - [x] **Portal novo — código pronto:** redemoinho animado (`PortalVortex`, `Art/Effects/PortalSwirl.png`)
   e a ferramenta `Editor/PortalSetup.cs` (**NebulaGuard → Trocar visual dos portais**)
-- [ ] Rodar a ferramenta dos portais no Unity e testar
+- [x] Portal novo e pontas das pontes (início na borda do portal, fim no centro da nave-mãe) testados no Unity
 - [ ] Efeitos, parte 2: rastro de fumaça do míssil do Bombardeiro
 - [ ] Sons: SFX (tiro, explosão, compra, dano na base) e música (`AudioManager`)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
