@@ -83,6 +83,9 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
 - **Brilho = Bloom**: brilha o que for mais claro que o Threshold (0,6) do `GameVolumeProfile`.
   Para algo brilhar, cor clara e material `Sprite-Unlit-Default`; para não brilhar, cor mais
   escura. O HUD (Canvas Screen Space - Overlay) não passa pelo pós-processamento.
+- **Tamanho de nave = escala do prefab** (Caça 1,3, Bombardeiro 1,5, Cruzador 1,6; Drone 0,7,
+  Caça alienígena 0,9, Couraçado 1,25). Não mexe no alcance (`TowerData`). Nave-torre não tem
+  collider: o clique acerta o do `BuildSlot`, que precisa cobrir a nave inteira.
 - **Sprite novo:** importa como Sprite a 100 px por unidade (≈ 1 unidade por nave); no Sprite
   Renderer, **Color branca** (a cor multiplica a imagem) e escala igual em X e Y. Os inimigos
   da Kenney apontam para baixo: `Sprite Angle Offset = 90` no `Enemy` (as naves-torre, para
@@ -205,7 +208,7 @@ Objetos da cena `Assets/_Project/Scenes/Game.unity` até agora:
 | LightBridge_B | (0, 0) | 1 | Bridges | Sprite-Unlit-Default | **só no Difícil**; cópia da A com 2 waypoints: (-14, 0) → (12, 0), reta. Criada por **Adicionar ponte do Difícil** |
 | Portal_B | (-14.8, 0) | 1.8 | Ships | Sprite-Lit-Default | **só no Difícil**; cópia do Portal_A, em `Second Bridge Objects` do `WaveSpawner` |
 | Mothership | (13.8, 0) | 3 | Ships | Sprite-Lit-Default | sprite `Art/Base/Mothership` (Kenney), tag `MotherShip`, `MotherShip` + `BoxCollider2D` trigger com Offset X = -0,5 |
-| BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,35, que cobre a nave posicionada) |
+| BuildSlots | (0, 0) | 1 | — | — | pai dos 6 slots `Slot_01`…`Slot_06`, instâncias de `Prefabs/BuildSlot` (círculo ciano provisório, `BuildSlot` + `CircleCollider2D` trigger com raio 0,5, que cobre a nave posicionada) |
 | GameSession | (0, 0) | — | — | — | créditos e pontos; os créditos iniciais vêm do `DifficultyData` pelo `GameManager` |
 | GameManager | (0, 0) | — | — | — | Difficulty = `Data/Facil`; referências a `WaveSpawner`, `Mothership`, `GameSession` e `BuildController` |
 | WaveSpawner | (0, 0) | — | — | — | Bridges = `LightBridge_A`, Session = `GameSession`; a dificuldade vem do `GameManager` (`Begin`); gera os inimigos (nenhum inimigo fica na cena antes do Play) |
@@ -286,21 +289,18 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   dificuldade, Ranking, Sobre, Sair; montado por código), `Core/Ranking.cs`, `Core/GameSettings.cs`,
   multiplicador de pontos (`DifficultyData.ScoreMultiplier`), botão "Menu principal" na pausa e no
   fim (`HUD`) e a ferramenta `Editor/MainMenuSetup.cs` (**NebulaGuard → Montar cena MainMenu**)
-- [ ] **Falta montar e testar o menu no Unity:** rodar **NebulaGuard → Montar cena MainMenu** (cria
-  `Scenes/MainMenu.unity`, põe as 2 cenas no Build Settings e acrescenta os botões na cena Game),
-  dar Play na MainMenu e conferir: Jogar → dificuldade → partida; Menu principal na pausa e no
-  fim volta; a posição no ranking aparece na tela de fim; Ranking e Sobre abrem. **Escrever os
-  nomes do grupo** no campo `About Text` do objeto `MainMenu`. Commitar as cenas, o
-  `EditorBuildSettings.asset` e os `.meta`
+- [x] Menu montado e testado no Unity: `Scenes/MainMenu.unity` (índice 0 do Build Settings), nomes
+  do grupo no `About Text`
 - [x] **Difícil — dados e código prontos:** `Data/Dificil.asset` (5 ondas, 50 inimigos, nave-mãe 15,
   300 s, +25% vida, +15% velocidade, venda 70%, pontos ×2), `DifficultyData.BridgeCount`, uso das
   pontes no `WaveSpawner` e a ferramenta `Editor/HardModeSetup.cs`
   (**NebulaGuard → Adicionar ponte do Difícil**)
-- [ ] **Falta no Difícil:** rodar a ferramenta acima (cria `LightBridge_B` e `Portal_B` na cena
-  Game), jogar no Difícil e **balancear** (os números do asset são um primeiro palpite, nunca
-  testados) e atualizar a tabela de dificuldades do plano. Se alguém rodar o **Montar cena
-  MainMenu** antes do Dificil existir, a lista do menu fica só com o Fácil: a ferramenta do
-  Difícil a completa
+- [x] Ponte do Difícil na cena (`LightBridge_B`, `Portal_B`); créditos iniciais do Difícil 100 → 150
+  após o primeiro teste
+- [x] Naves-torre maiores (Caça 1,3, Bombardeiro 1,5, Cruzador 1,6) e inimigos um pouco maiores;
+  collider do `BuildSlot` com raio 0,5
+- [ ] **Falta no Difícil:** continuar o balanceamento (vida da nave-mãe, tamanho das ondas) e
+  atualizar a tabela de dificuldades do plano
 - [ ] Efeitos e sons: partículas, tremida de câmera, SFX e música (inclui a explosão
   e o rastro de fumaça do míssil do Bombardeiro)
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual

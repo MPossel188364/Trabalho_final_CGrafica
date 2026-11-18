@@ -981,3 +981,31 @@ Ranking e Sobre. **Escrever os nomes do grupo** no `About Text` do objeto `MainM
 
 **Como testar:** rodar a ferramenta; no menu, Jogar → Difícil; os inimigos saem dos dois portais
 (A em zigue-zague, B reta); no Fácil, só o portal A aparece.
+
+## 2026-11-17 — Menu e Difícil montados no Unity; naves maiores e mais créditos no Difícil
+
+**O que foi feito:**
+- Rodadas as ferramentas **Montar cena MainMenu** e **Adicionar ponte do Difícil**: existem
+  `Scenes/MainMenu.unity` (índice 0 do Build Settings), `LightBridge_B` e `Portal_B` na cena Game.
+  Nomes do grupo no `About Text`.
+- Difícil: **créditos iniciais 100 → 150** (`Data/Dificil.asset`). No primeiro teste ele ficou
+  difícil demais: com 100 só dava para uma nave antes da primeira onda vir pelos dois caminhos.
+- Naves-torre bem maiores (escala no prefab): Caça 0,8 → 1,3; Bombardeiro 1 → 1,5;
+  Cruzador 1,1 → 1,6.
+- Inimigos um pouco maiores: Drone 0,6 → 0,7; Caça alienígena 0,8 → 0,9; Couraçado 1,1 → 1,25.
+- `BuildSlot`: raio do collider 0,35 → 0,5 (com a escala 2 do slot, 1 unidade no mundo), para o
+  clique de venda pegar a nave inteira, agora maior.
+
+**Por quê assim:**
+- **Só a escala muda, o alcance não:** alcance e dano ficam no `TowerData`; a nave maior é só
+  visual. O `Muzzle` (ponta de onde sai o tiro) é filho da nave, então acompanha a escala e
+  continua no bico.
+- **Por que cabe:** o Cruzador, o maior, fica com ~1,6 × 1,2 unidades. Os slots estão a 4 unidades
+  um do outro e a ~2,5 da borda da ponte, e a ponte B passa a 2 unidades deles: não encosta em nada.
+- **Inimigos só um pouco:** o collider deles cresce junto (fica um pouco mais fácil de acertar);
+  aumentar muito mudaria o balanceamento e embolaria a fila na ponte.
+- **Collider do slot maior:** as naves não têm collider próprio; o clique acerta o slot embaixo.
+  Com raio 0,7 no mundo, clicar na asa da nave grande caía fora.
+
+**Como testar:** Play na cena MainMenu → Difícil: começa com 150 créditos. Construir as três naves
+e ver que cabem nos corredores; clicar na ponta da asa abre o "Vender".
