@@ -21,4 +21,5 @@ MonoBehaviour:
   projectileSpeed: 30
   turnSpeed: 270
   targeting: 1
+  fireSound: 2
   projectilePrefab: {fileID: 5751343955770343520, guid: 38f8a0a4dc34d39990f9b3bedc936575, type: 3}

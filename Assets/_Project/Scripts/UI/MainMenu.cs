@@ -38,7 +38,8 @@ namespace NebulaGuard
             "Universidade de Passo Fundo - 2026/2\n\n" +
             "Integrantes:\n" +
             "(escreva os nomes aqui: objeto MainMenu, campo About Text)\n\n" +
-            "Sprites e fonte: Kenney (kenney.nl), licença CC0";
+            "Sprites e fonte: Kenney (kenney.nl), licença CC0\n" +
+            "Sons e músicas: gerados por código (tools/gerar_sons.py)";
 
         [Header("Visual (preenchido pela ferramenta)")]
         [SerializeField] private TMP_FontAsset font;
@@ -287,6 +288,7 @@ namespace NebulaGuard
             var button = buttonObject.GetComponent<Button>();
             button.targetGraphic = image;
             button.onClick.AddListener(onClick);
+            button.onClick.AddListener(AudioManager.PlayClick);
 
             // O botão da Kenney é branco: texto escuro para aparecer (sem imagem, branco).
             TMP_Text text = CreateText(buttonObject.transform, label, 42f, sprite != null ? DarkText : Color.white);

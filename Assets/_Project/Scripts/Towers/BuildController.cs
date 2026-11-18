@@ -114,7 +114,9 @@ namespace NebulaGuard
                 return;
 
             // Se por algum motivo a nave não foi posicionada, devolve os créditos.
-            if (!selected.TryPlace(prefab))
+            if (selected.TryPlace(prefab))
+                AudioManager.Play(Sfx.Build);
+            else
                 session.AddCredits(cost);
 
             CloseMenu();
@@ -128,7 +130,10 @@ namespace NebulaGuard
             // Lê o valor antes de remover: depois do TryClear a nave não existe mais.
             int refund = RefundFor(selected.Occupant.Data);
             if (selected.TryClear())
+            {
                 session.AddCredits(refund);
+                AudioManager.Play(Sfx.Sell);
+            }
 
             CloseMenu();
         }

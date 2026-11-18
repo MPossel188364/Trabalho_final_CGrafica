@@ -134,6 +134,7 @@ namespace NebulaGuard
             enemy.Initialize(bridge, difficulty.HealthMultiplier, difficulty.SpeedMultiplier);
 
             session.Register(enemy);
+            AudioManager.Play(Sfx.Spawn);
             enemy.Died += OnEnemyGone;
             enemy.ReachedBase += OnEnemyGone;
             aliveInWave++;
