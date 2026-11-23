@@ -98,7 +98,10 @@ namespace NebulaGuard
             for (int i = 0; i < list.Count; i++)
             {
                 RankingEntry entry = list[i];
-                builder.Append(i + 1).Append(".  ").Append(entry.score)
+                // Partidas salvas antes de existir o nome não têm nome: mostram "---".
+                string name = string.IsNullOrEmpty(entry.name) ? "---" : entry.name;
+                builder.Append(i + 1).Append(".  ").Append(name)
+                       .Append("  -  ").Append(entry.score)
                        .Append("  -  ").Append(entry.difficulty)
                        .Append("  -  ").Append(entry.date);
                 if (i < list.Count - 1)

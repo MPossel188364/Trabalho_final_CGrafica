@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.EnemyData
   displayName: "Ca\xE7a Alienigena"
   maxHealth: 40
-  speed: 2
+  speed: 3
   baseDamage: 5
-  creditsReward: 10
+  creditsReward: 15
   scoreReward: 25

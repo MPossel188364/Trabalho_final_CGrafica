@@ -99,6 +99,10 @@ namespace NebulaGuard
 
             timerNormalColor = timerText.color;
 
+            // "Pontos: 1250 - novo recorde!" é mais largo que a caixa: sem isto ele quebra em
+            // duas linhas e a segunda cai em cima do campo de nome e dos botões.
+            endScoreText.textWrappingMode = TextWrappingModes.NoWrap;
+
             // CanvasGroup controla a transparência do painel inteiro (fundo, textos e botão).
             if (!endPanel.TryGetComponent(out endGroup))
                 endGroup = endPanel.AddComponent<CanvasGroup>();
@@ -210,6 +214,14 @@ namespace NebulaGuard
                 endScoreText.text = ScoreLine();
                 if (endReasonText != null)
                     endReasonText.text = Capitalize(gameManager.EndReason);
+
+                // Entrou no top 5: campo para o jogador escrever o nome que fica no ranking.
+                if (gameManager.LastRankingPosition > 0)
+                {
+                    endPanel.AddComponent<RankingNameEntry>().Setup(
+                        gameManager.LastRankingPosition, endScoreText, restartButton,
+                        restartButton, endMenuButton);
+                }
 
                 endGroup.alpha = 0f;
                 endFadeTime = 0f;

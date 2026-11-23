@@ -173,8 +173,9 @@ namespace NebulaGuard
             EndReason = reason;
 
             // Toda partida terminada, com vitória ou derrota, tenta entrar no ranking. Precisa
-            // vir antes do SetState: o HUD lê a posição quando recebe o aviso de fim.
-            LastRankingPosition = Ranking.Submit(session.Score, difficulty.DisplayName);
+            // vir antes do SetState: o HUD lê a posição quando recebe o aviso de fim. Entra com
+            // o último nome usado; a tela de fim deixa o jogador trocar (Ranking.SetName).
+            LastRankingPosition = Ranking.Submit(session.Score, difficulty.DisplayName, Ranking.LastPlayerName);
 
             Debug.Log($"Fim de partida: {(victory ? "VITÓRIA" : "DERROTA")} ({reason}). Pontos: {session.Score}. Posição no ranking: {LastRankingPosition}.");
             SetState(victory ? GameState.Victory : GameState.Defeat);

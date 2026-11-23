@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Dificil
   m_EditorClassIdentifier: Assembly-CSharp::NebulaGuard.DifficultyData
   displayName: "Dif\xEDcil"
-  startingCredits: 150
+  startingCredits: 200
   motherShipHealth: 15
   timeLimit: 300
   spawnInterval: 1

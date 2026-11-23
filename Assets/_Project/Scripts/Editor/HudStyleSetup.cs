@@ -260,6 +260,7 @@ namespace NebulaGuard.EditorTools
             var scoreText = score.GetComponent<TMP_Text>();
             Undo.RecordObject(scoreText, "EndScore");
             scoreText.color = Gold;
+            StyleText(score, TextAlignmentOptions.Center, null); // sem quebra de linha: a frase do recorde é comprida
 
             StyleButton(root, "EndPanel/RestartButton", "ButtonGreen");
             Transform restart = Find(panel, "RestartButton");
