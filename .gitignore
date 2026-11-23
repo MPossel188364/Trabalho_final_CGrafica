@@ -49,3 +49,6 @@ crashlytics-buildid.txt
 .DS_Store
 Thumbs.db
 *.slnx
+
+# Build compactado para a release (vai para o GitHub Releases, não para o repositório)
+/*.zip
