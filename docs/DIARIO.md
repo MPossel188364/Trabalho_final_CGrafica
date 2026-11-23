@@ -1201,3 +1201,39 @@ partida: som de vitória ou derrota. Volumes: Inspector do objeto `AudioManager`
 ou as tabelas no topo do `AudioManager.cs`.
 
 **Limite:** escrito sem abrir o Unity e sem ouvir os sons; falta testar e ajustar volume/tom de ouvido.
+
+## 2026-11-22 — Nome do jogador no ranking
+
+**O que foi feito:**
+- `RankingEntry` ganhou o campo `name`. `Ranking.Submit` recebe o nome; `Ranking.SetName(posição,
+  nome)` troca o nome de uma linha; `Ranking.LastPlayerName` guarda o último nome usado
+  (`PlayerPrefs`, chave `NebulaGuard.LastPlayerName`). Nome com no máximo 12 letras; vazio vira
+  "Jogador".
+- `UI/RankingNameEntry.cs`: quando a partida entra no top 5, a tela de fim mostra o campo
+  "Seu nome" e o botão **Salvar** (Enter também salva). Os botões "Jogar de novo" e "Menu
+  principal" descem para dar espaço. Depois de salvar, o botão vira "Salvo!".
+- O ranking do menu principal mostra o nome antes dos pontos.
+
+**Por quê assim:**
+- **A partida entra no ranking antes do nome, com o último nome usado.** Se o jogador clicar em
+  "Menu principal" sem digitar, o recorde não se perde. Digitar só troca o nome da linha.
+- **Último nome já preenchido e selecionado:** quem joga várias vezes só aperta Enter; quem quer
+  trocar digita por cima.
+- **Campo montado por código, copiando o visual da tela de fim** (fonte do texto de pontos, botão
+  "Jogar de novo" copiado para fazer o "Salvar"): funciona sem rodar ferramenta nenhuma no editor e
+  segue o estilo da Kenney sozinho. O componente não fica na cena; o `HUD` o acrescenta no
+  `EndPanel` só quando a partida entrou no ranking.
+- **Componente separado do `HUD`:** o HUD só escuta eventos; editar o ranking é outra
+  responsabilidade.
+- Partidas salvas antes desta mudança não têm nome e aparecem com "---" no menu.
+
+**Correção (mesmo dia):** o campo apareceu em cima da frase de pontos. O texto `EndScore` estava com
+quebra de linha ligada numa caixa de 800 de largura; "Pontos: 1250 - novo recorde!" na fonte
+Kenvector (larga) passava disso e a segunda linha caía onde o campo fica. Agora o `HUD` desliga a
+quebra desse texto no `Awake` (e a ferramenta **Aplicar estilo ao HUD** também), e a linha do nome
+desceu um pouco (y = -150; botões 130 abaixo de onde estavam).
+
+**Como testar:** Play na MainMenu → Jogar → fazer alguns pontos e perder (ou ganhar). Na tela de fim
+aparece o campo com "Jogador"; digitar um nome e apertar Enter (ou Salvar) → "Salvo!". Menu
+principal → Ranking: o nome aparece na linha. Jogar de novo: o campo já vem com o último nome.
+Partida que não entra no top 5 (ou com 0 pontos) não mostra o campo.

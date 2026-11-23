@@ -50,7 +50,7 @@ Assets/_Project/
     Data/      TowerData, EnemyData, DifficultyData
     Enemies/   Enemy, LightBridge, WaveSpawner
     Towers/    TowerShip, Projectile, BuildSlot, BuildController
-    UI/        HUD, MainMenu, BuildMenuUI
+    UI/        HUD, MainMenu, BuildMenuUI, RankingNameEntry
     Effects/   CameraShake, ParallaxLayer, DeathEffect, EffectSpawner, PortalVortex
     Editor/    BuildSlotSetup, HudStyleSetup, MainMenuSetup, HardModeSetup, EffectsSetup, PortalSetup (só existem no editor, não entram no build)
   Data/        assets .asset (ScriptableObjects) de naves, inimigos e dificuldades
@@ -143,6 +143,9 @@ Fora de `Assets/`, a pasta `tools/` guarda scripts auxiliares que o Unity não i
   `Ranking.Submit` ao fim de **toda** partida (vitória ou derrota) e guarda a posição em
   `LastRankingPosition`, que o HUD mostra. Partida com 0 pontos não entra; empate fica atrás de
   quem já estava.
+  A partida entra com o **último nome usado** (`Ranking.LastPlayerName`, "Jogador" na primeira vez);
+  se entrou no top 5, o `HUD` acrescenta o `RankingNameEntry` no `EndPanel` (campo + "Salvar",
+  montados por código), que troca o nome da linha com `Ranking.SetName`.
 - **Quantas pontes a partida usa vem da dificuldade** (`BridgeCount`: Fácil 1, Difícil 2). O
   `WaveSpawner` liga só essas e desliga as outras junto com o portal delas (`Second Bridge
   Objects`). Ponte nova = filha de nada: o `LightBridge` trata **todo filho como waypoint**, então
@@ -318,8 +321,10 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   após o primeiro teste
 - [x] Naves-torre maiores (Caça 1,3, Bombardeiro 1,5, Cruzador 1,6) e inimigos um pouco maiores;
   collider do `BuildSlot` com raio 0,5
-- [ ] **Falta no Difícil:** continuar o balanceamento (vida da nave-mãe, tamanho das ondas) e
-  atualizar a tabela de dificuldades do plano
+- [x] Balanceamento do Difícil feito (créditos iniciais 200; Caça alienígena mais rápido e com mais
+  recompensa; Couraçado mais rápido)
+- [x] **Nome do jogador no ranking** (testado no Unity): `UI/RankingNameEntry.cs`
+  (campo na tela de fim), `Ranking.SetName` e nome na lista do menu
 - [x] **Explosões e tremida — código pronto:** `Effects/DeathEffect.cs`, `EffectSpawner.cs`,
   `CameraShake.cs`, efeito de impacto no `Projectile` e a ferramenta `Editor/EffectsSetup.cs`
   (**NebulaGuard → Adicionar explosões e tremida**)
@@ -332,7 +337,9 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
   **NebulaGuard → Adicionar rastro de fumaça no míssil**
 - [x] Rastro do míssil e nome novo testados no Unity
 - [x] Nome do jogo: **Space Defense** (título do menu e Product Name)
-- [x] **Sons e música — código pronto, falta testar no Unity:** `Core/AudioManager.cs` (nasce sozinho),
+- [x] **Sons e música** (testados no Unity): `Core/AudioManager.cs` (nasce sozinho),
   14 efeitos e 2 músicas em `Audio/Resources/` gerados por `tools/gerar_sons.py`, `TowerData.fireSound`
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
-- [ ] Build Windows, vídeo demonstrativo e links no README
+- [x] Build Windows publicado na release **v1.0** do GitHub (`Build.zip`):
+  https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v1.0
+- [ ] Vídeo demonstrativo (YouTube, não listado) e README com os links

@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace NebulaGuard
 {
-    /// <summary>Uma linha do ranking: quantos pontos, em qual dificuldade e quando.</summary>
+    /// <summary>Uma linha do ranking: quem jogou, quantos pontos, em qual dificuldade e quando.</summary>
     [Serializable]
     public class RankingEntry
     {
+        public string name;
         public int score;
         public string difficulty;
         public string date;
@@ -22,7 +23,14 @@ namespace NebulaGuard
     {
         public const int MaxEntries = 5;
 
+        /// <summary>Tamanho máximo do nome (cabe na linha do ranking com a fonte grande).</summary>
+        public const int MaxNameLength = 12;
+
+        /// <summary>Nome usado quando o jogador ainda não digitou nenhum.</summary>
+        public const string DefaultName = "Jogador";
+
         private const string Key = "NebulaGuard.Ranking";
+        private const string LastNameKey = "NebulaGuard.LastPlayerName";
 
         // O PlayerPrefs só guarda número e texto; a lista inteira vai como um texto JSON.
         [Serializable]
@@ -42,7 +50,7 @@ namespace NebulaGuard
         /// ou 0 se não entrou. Partida com 0 pontos não entra. Em caso de empate, quem já
         /// estava no ranking fica na frente.
         /// </summary>
-        public static int Submit(int score, string difficulty)
+        public static int Submit(int score, string difficulty, string name)
         {
             if (score <= 0)
                 return 0;
@@ -58,6 +66,7 @@ namespace NebulaGuard
 
             data.entries.Insert(index, new RankingEntry
             {
+                name = CleanName(name),
                 score = score,
                 difficulty = difficulty,
                 date = DateTime.Now.ToString("dd/MM/yyyy"),
@@ -68,6 +77,40 @@ namespace NebulaGuard
 
             Save(data);
             return index + 1;
+        }
+
+        /// <summary>
+        /// Troca o nome de uma linha do ranking (posição 1 a 5, a que o Submit devolveu) e
+        /// guarda o nome como o último usado, para já vir preenchido na próxima partida.
+        /// </summary>
+        public static void SetName(int position, string name)
+        {
+            string clean = CleanName(name);
+            PlayerPrefs.SetString(LastNameKey, clean);
+
+            Data data = Load();
+            int index = position - 1;
+            if (index >= 0 && index < data.entries.Count)
+            {
+                data.entries[index].name = clean;
+                Save(data);
+            }
+            else
+            {
+                PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>O último nome salvo, ou "Jogador" se ninguém salvou ainda.</summary>
+        public static string LastPlayerName => PlayerPrefs.GetString(LastNameKey, DefaultName);
+
+        /// <summary>Tira espaços das pontas, corta no tamanho máximo e troca vazio por "Jogador".</summary>
+        public static string CleanName(string name)
+        {
+            string clean = (name ?? string.Empty).Trim();
+            if (clean.Length > MaxNameLength)
+                clean = clean.Substring(0, MaxNameLength);
+            return clean.Length > 0 ? clean : DefaultName;
         }
 
         /// <summary>Apaga o ranking.</summary>
