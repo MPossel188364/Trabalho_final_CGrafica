@@ -3,8 +3,8 @@ Tower defense 2D no espaço, feito em Unity para a disciplina **CCC300 – Compu
 
 Links
 Baixar o jogo (executável para Windows)
-(https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v1.0) 
-Arquivo Build.zip
+(https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v2.0) 
+Arquivo BuildV2.zip
 
 Vídeo demonstrativo (https://www.youtube.com/watch?v=bNno85zdbXY)
 

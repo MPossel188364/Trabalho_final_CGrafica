@@ -1237,3 +1237,19 @@ desceu um pouco (y = -150; botões 130 abaixo de onde estavam).
 aparece o campo com "Jogador"; digitar um nome e apertar Enter (ou Salvar) → "Salvo!". Menu
 principal → Ranking: o nome aparece na linha. Jogar de novo: o campo já vem com o último nome.
 Partida que não entra no top 5 (ou com 0 pontos) não mostra o campo.
+
+## 2026-11-24 — Tela Sobre, build v2.0 e link do README
+
+**O que foi feito:**
+- `About Text` da cena MainMenu: ganhou o objetivo do jogo, quando se vence e se perde, e os
+  controles. Antes mostrava só a disciplina, os integrantes e os créditos.
+- Build Windows novo, publicado na release **v2.0** (`BuildV2.zip`). O link do README apontava para
+  a v1.0, de onde o zip foi removido.
+- `.gitignore`: pastas `Build*/` da raiz.
+
+**Por quê:**
+- **Sobre:** o PDF pede "informações sobre o jogo" no menu principal.
+- **Build fora do repositório:** o PDF pede só o código-fonte; o executável vai na release.
+
+**Como testar:** menu principal → Sobre: o texto cabe na tela, junto com integrantes e créditos. O
+link do README abre a release v2.0 com o `BuildV2.zip`.

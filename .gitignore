@@ -52,3 +52,6 @@ Thumbs.db
 
 # Build compactado para a release (vai para o GitHub Releases, não para o repositório)
 /*.zip
+
+# Pasta do build (Build/, BuildV2/...): só a da raiz, para não pegar pastas dentro de Assets
+/Build*/
