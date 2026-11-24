@@ -343,9 +343,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: abf74d0662e9459bbec5a17ff57d45aa, type: 2}
   gameSceneName: Game
   aboutText: "Trabalho final de Computa\xE7\xE3o Gr\xE1fica (CCC300)\nUniversidade
-    de Passo Fundo - 2026/2\n\nIntegrantes:\nJo\xE3o Paulo Gatto de Oliveira, Matheus
-    Brkanitch Possel, Augusto Bilhar Rosa\n\nSprites e fonte: Kenney (kenney.nl),
-    licen\xE7a CC0"
+    de Passo Fundo - 2026/2\n\nConstrua naves-torre ao lado das pontes de luz e impe\xE7a
+    os alien\xEDgenas de chegar \xE0 nave-m\xE3e. Ven\xE7a eliminando todas as ondas;
+    perca se a nave-m\xE3e for destru\xEDda ou o tempo acabar.\n\nClique num ponto
+    vazio: construir. Clique numa nave: vender. Esc: pausar.\n\nIntegrantes:\nJo\xE3o
+    Paulo Gatto de Oliveira, Matheus Brkanitch Possel, Augusto Bilhar Rosa\n\nSprites
+    e fonte: Kenney (kenney.nl), licen\xE7a CC0"
   font: {fileID: 11400000, guid: 6ea9415bf5dae4dfeb31410ed5e97e00, type: 2}
   greenButton: {fileID: 21300000, guid: d090498db617b4438aa079c39c7db407, type: 3}
   blueButton: {fileID: 21300000, guid: 282e8101b37e34f6fa119e21cb286baf, type: 3}

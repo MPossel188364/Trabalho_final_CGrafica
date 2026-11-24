@@ -340,6 +340,7 @@ Prefabs em `Prefabs/`: as naves `Caca`, `Bombardeiro` e `Cruzador`, e os projét
 - [x] **Sons e música** (testados no Unity): `Core/AudioManager.cs` (nasce sozinho),
   14 efeitos e 2 músicas em `Audio/Resources/` gerados por `tools/gerar_sons.py`, `TowerData.fireSound`
 - ~~Astronauta~~: cortado em 17/11 (o PDF não exige); o tempo vai para o visual
-- [x] Build Windows publicado na release **v1.0** do GitHub (`Build.zip`):
-  https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v1.0
-- [ ] Vídeo demonstrativo (YouTube, não listado) e README com os links
+- [x] Build Windows publicado na release **v2.0** do GitHub (`BuildV2.zip`):
+  https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v2.0
+- [x] Vídeo demonstrativo (YouTube) e README com os links
+- [x] Tela Sobre com o objetivo do jogo e os controles (`About Text` da cena MainMenu)
