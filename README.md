@@ -6,7 +6,7 @@ Baixar o jogo (executável para Windows)
 (https://github.com/MPossel188364/Trabalho_final_CGrafica/releases/tag/v1.0) 
 Arquivo Build.zip
 
-Vídeo demonstrativo ( COLE O LINK DO VÍDEO AQUI )
+Vídeo demonstrativo (https://www.youtube.com/watch?v=bNno85zdbXY)
 
 Sobre o jogo
 
